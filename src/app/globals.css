@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* ChemTrack design tokens — from the UI design review deck. */
+@theme {
+  --color-ink: #10242b; /* body text */
+  --color-muted: #5c7079; /* secondary text */
+  --color-line: #dce4e7; /* borders */
+  --color-paper: #f4f7f8; /* page background */
+  --color-card: #ffffff;
+  --color-teal-deep: #0e4c5c; /* nav, headings */
+  --color-teal: #12a594; /* primary action */
+  --color-teal-soft: #e3f4f1;
+  --color-accent: #e2542d; /* scope / my custody */
+  --color-accent-soft: #fdeee8;
+  --color-danger: #c0392b; /* corrosive, toxic, expired */
+  --color-danger-soft: #fbeae7;
+  --color-warning: #b07d12; /* low stock, expiring */
+  --color-warning-soft: #fdf3dd;
+  --color-caution: #c2571a; /* flammable, incompatible */
+  --color-ok: #1f7a4d; /* in date, within limits */
+  --color-ok-soft: #e5f4ec;
+  --color-info: #2563a8; /* pending approval, in transit */
+  --color-info-soft: #e8f0fa;
+  --color-restricted: #6d28d9; /* controlled / licensed */
+  --color-restricted-soft: #f1eafd;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+@media print {
+  body {
+    background-color: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

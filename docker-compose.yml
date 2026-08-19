@@ -1,0 +1,72 @@
+# ChemTrack — internal-server deployment.
+#
+# First run:
+#   docker compose run --rm migrate        # applies migrations as the owner role
+#   docker compose run --rm app pnpm tsx prisma/seed.ts   # optional demo data
+#   docker compose up -d
+#
+# Back up BOTH the postgres volume (pg_dump) and the files volume (SDS uploads).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chemtrack_owner
+      POSTGRES_PASSWORD: ${POSTGRES_OWNER_PASSWORD:?set in .env}
+      POSTGRES_DB: chemtrack
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/init-app-role.sh:/docker-entrypoint-initdb.d/10-app-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chemtrack_owner -d chemtrack"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    build: .
+    command: sh -c "node_modules/.bin/prisma migrate deploy"
+    environment:
+      DATABASE_URL: postgresql://chemtrack_owner:${POSTGRES_OWNER_PASSWORD}@postgres:5432/chemtrack
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["tools"]
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://chemtrack_app:${POSTGRES_APP_PASSWORD:?set in .env}@postgres:5432/chemtrack
+      AUTH_SECRET: ${AUTH_SECRET:?set in .env}
+      AUTH_TRUST_HOST: "true"
+      FILE_STORAGE_ROOT: /data/files
+    volumes:
+      - files:/data/files
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: node_modules/.bin/tsx src/worker/index.ts
+    environment:
+      DATABASE_URL: postgresql://chemtrack_app:${POSTGRES_APP_PASSWORD}@postgres:5432/chemtrack
+      FILE_STORAGE_ROOT: /data/files
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-25}
+      SMTP_FROM: ${SMTP_FROM:-chemtrack@lab.internal}
+      EHS_REPORT_RECIPIENTS: ${EHS_REPORT_RECIPIENTS:-}
+    volumes:
+      - files:/data/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  files:

@@ -1,0 +1,699 @@
+// ChemTrack data model.
+//
+// Structural decisions:
+// - Substance (chemical identity) is split from Container (physical unit).
+//   Every screen that says "one record per bottle" reads Container.
+// - Container.currentQuantity is the cached authoritative read value; every
+//   change flows through an InventoryTransaction whose AuditEvent is part of
+//   a single global hash chain (see src/server/audit.ts and the raw-SQL
+//   migration that makes audit_event append-only at the database level).
+// - Legacy import provenance is kept forever in ImportBatch/ImportRow.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & access
+// ---------------------------------------------------------------------------
+
+enum Role {
+  VIEWER
+  LAB_USER
+  CUSTODIAN
+  LAB_MANAGER
+  EHS_OFFICER
+  ADMIN
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String
+  passwordHash String? // null once SSO-only accounts exist
+  role         Role    @default(LAB_USER)
+  isActive     Boolean @default(true)
+  tokenVersion Int     @default(1) // bump to force re-login
+  totpSecret   String? // future TOTP step-up for controlled substances
+
+  labMemberships    LabMembership[]
+  authProviders     AuthProvider[]
+  custodyContainers Container[]      @relation("custodian")
+  auditEvents       AuditEvent[]     @relation("actor")
+  witnessedEvents   AuditEvent[]     @relation("witness")
+  sdsReadReceipts   SdsReadReceipt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user")
+}
+
+// Future institutional SSO: link rows per external identity provider.
+model AuthProvider {
+  id                String @id @default(cuid())
+  userId            String
+  provider          String // e.g. "oidc:university"
+  providerAccountId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("auth_provider")
+}
+
+model LabMembership {
+  id        String  @id @default(cuid())
+  userId    String
+  labId     String
+  isManager Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, labId])
+  @@map("lab_membership")
+}
+
+// ---------------------------------------------------------------------------
+// Places
+// ---------------------------------------------------------------------------
+
+model Site {
+  id   String @id @default(cuid())
+  name String @unique
+  labs Lab[]
+
+  @@map("site")
+}
+
+model Lab {
+  id     String @id @default(cuid())
+  siteId String
+  code   String @unique // e.g. "B2-14"
+  name   String // e.g. "Organic Synthesis"
+
+  site              Site               @relation(fields: [siteId], references: [id])
+  locations         StorageLocation[]
+  memberships       LabMembership[]
+  containers        Container[]
+  stocktakeSessions StocktakeSession[]
+  alertThresholds   AlertThresholdSetting?
+
+  @@map("lab")
+}
+
+enum LocationKind {
+  CABINET
+  SHELF
+  FRIDGE
+  ROOM
+  OTHER
+}
+
+// Hierarchical: cabinet -> shelf -> position. `code` is canonical; the messy
+// legacy spellings live in rawAliases so imported data stays traceable.
+model StorageLocation {
+  id         String       @id @default(cuid())
+  labId      String
+  parentId   String?
+  kind       LocationKind @default(OTHER)
+  code       String // canonical, e.g. "FC-1" or "FC-1/S2"
+  name       String?
+  capacity   Int? // max containers, used by check-in shelf picker
+  maxVolumeL Decimal? // aggregate limit, e.g. 50 L flammables per cabinet
+  rawAliases String[]     @default([])
+  incomplete Boolean      @default(false) // legacy rows like "E4-"
+
+  lab        Lab               @relation(fields: [labId], references: [id])
+  parent     StorageLocation?  @relation("locationTree", fields: [parentId], references: [id])
+  children   StorageLocation[] @relation("locationTree")
+  containers Container[]
+
+  @@unique([labId, code])
+  @@map("storage_location")
+}
+
+// ---------------------------------------------------------------------------
+// Chemistry
+// ---------------------------------------------------------------------------
+
+model Substance {
+  id                 String  @id @default(cuid())
+  name               String
+  casNumber          String? @unique
+  ecNumber           String?
+  unNumber           String?
+  molecularFormula   String?
+  legacyHazardCode   String? // UN class from the legacy export, e.g. "3", "6.1"
+  minStockLevel      Decimal?
+  minStockUnit       CanonicalUnit?
+  isControlled       Boolean @default(false) // controlled/licensed substance
+  needsCasEnrichment Boolean @default(false) // set by legacy import
+
+  ghs              GhsClassification?
+  supplierProducts SupplierProduct[]
+  containers       Container[]
+  sdsDocuments     SdsDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("substance")
+}
+
+model SupplierProduct {
+  id            String @id @default(cuid())
+  substanceId   String
+  supplier      String
+  catalogNumber String
+
+  substance Substance @relation(fields: [substanceId], references: [id], onDelete: Cascade)
+
+  @@unique([substanceId, supplier, catalogNumber])
+  @@map("supplier_product")
+}
+
+enum GhsPictogram {
+  GHS01_EXPLOSIVE
+  GHS02_FLAMMABLE
+  GHS03_OXIDISER
+  GHS04_GAS
+  GHS05_CORROSIVE
+  GHS06_TOXIC
+  GHS07_IRRITANT
+  GHS08_HEALTH_HAZARD
+  GHS09_ENVIRONMENT
+}
+
+enum SignalWord {
+  DANGER
+  WARNING
+  NONE
+}
+
+enum ClassificationSource {
+  SUPPLIER_SDS
+  AUTO_DERIVED
+  LOCAL_EHS_RULE
+}
+
+model GhsClassification {
+  id           String         @id @default(cuid())
+  substanceId  String         @unique
+  pictograms   GhsPictogram[] @default([])
+  signalWord   SignalWord     @default(NONE)
+  // Key into the compatibility matrix, e.g. "FLAMMABLE", "OXIDISER".
+  storageClass String?
+
+  substance   Substance                    @relation(fields: [substanceId], references: [id], onDelete: Cascade)
+  hStatements HStatementOnClassification[]
+  pStatements PStatementOnClassification[]
+
+  updatedAt DateTime @updatedAt
+
+  @@map("ghs_classification")
+}
+
+// Reference tables seeded from the GHS catalogue.
+model HStatement {
+  code            String                       @id // "H225"
+  text            String
+  hazardCategory  String? // "Flam. Liq. 2"
+  classifications HStatementOnClassification[]
+
+  @@map("h_statement")
+}
+
+model PStatement {
+  code            String                       @id // "P210"
+  text            String
+  classifications PStatementOnClassification[]
+
+  @@map("p_statement")
+}
+
+model HStatementOnClassification {
+  classificationId String
+  hCode            String
+  source           ClassificationSource @default(SUPPLIER_SDS)
+  needsReview      Boolean              @default(false) // flagged when supplier SDS revises
+
+  classification GhsClassification @relation(fields: [classificationId], references: [id], onDelete: Cascade)
+  statement      HStatement        @relation(fields: [hCode], references: [code])
+
+  @@id([classificationId, hCode])
+  @@map("h_statement_on_classification")
+}
+
+model PStatementOnClassification {
+  classificationId String
+  pCode            String
+  source           ClassificationSource @default(SUPPLIER_SDS)
+
+  classification GhsClassification @relation(fields: [classificationId], references: [id], onDelete: Cascade)
+  statement      PStatement        @relation(fields: [pCode], references: [code])
+
+  @@id([classificationId, pCode])
+  @@map("p_statement_on_classification")
+}
+
+enum CompatibilityVerdict {
+  COMPATIBLE
+  SEGREGATE
+  NEVER_TOGETHER
+}
+
+// Symmetric rules between storage classes; seeded, EHS-editable.
+// Stored with classA <= classB lexicographically to avoid duplicates.
+model CompatibilityRule {
+  id      String               @id @default(cuid())
+  classA  String
+  classB  String
+  verdict CompatibilityVerdict
+
+  @@unique([classA, classB])
+  @@map("compatibility_rule")
+}
+
+// ---------------------------------------------------------------------------
+// Permits (from the legacy system's report sections)
+// ---------------------------------------------------------------------------
+
+model PermitCategory {
+  id         String @id @default(cuid())
+  code       String @unique // "HS", "CW", "SCDF", "AFI"
+  name       String // "Hazardous Substances", ...
+  containers ContainerPermitCategory[]
+
+  @@map("permit_category")
+}
+
+model ContainerPermitCategory {
+  containerId      String
+  permitCategoryId String
+  permitCode       String? // e.g. "CREATE HUJ/BGU R02-08"
+
+  container      Container      @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  permitCategory PermitCategory @relation(fields: [permitCategoryId], references: [id])
+
+  @@id([containerId, permitCategoryId])
+  @@map("container_permit_category")
+}
+
+// ---------------------------------------------------------------------------
+// Containers
+// ---------------------------------------------------------------------------
+
+enum CanonicalUnit {
+  MG
+  G
+  KG
+  ML
+  L
+  UNIT
+}
+
+enum ContainerStatus {
+  ACTIVE
+  EMPTY
+  DISPOSED
+  MISSING
+  QUARANTINED
+}
+
+model Container {
+  id              String          @id @default(cuid())
+  code            String          @unique // printed on the QR label, e.g. "B2-14-A11"
+  substanceId     String
+  labId           String // owning lab; drives the custody rule
+  locationId      String?
+  custodianId     String? // null + pendingCorrection when unknown after import
+  currentQuantity Decimal
+  initialQuantity Decimal
+  unit            CanonicalUnit
+  lotNumber       String?
+  grade           String?
+  expiryDate      DateTime?
+  receivedAt      DateTime?
+  openedAt        DateTime?
+  status          ContainerStatus @default(ACTIVE)
+  useFirst        Boolean         @default(false) // flagged from expiry alerts
+  // Unresolved legacy-import issues, e.g. {"custodian": "Pending for Correction",
+  // "rawLocation": "E4-", "unit": "m"} — read by the admin fixup worklist.
+  pendingCorrection Json?
+
+  substance        Substance                 @relation(fields: [substanceId], references: [id])
+  lab              Lab                       @relation(fields: [labId], references: [id])
+  location         StorageLocation?          @relation(fields: [locationId], references: [id])
+  custodian        User?                     @relation("custodian", fields: [custodianId], references: [id])
+  transactions     InventoryTransaction[]
+  transferRequests TransferRequest[]
+  permitCategories ContainerPermitCategory[]
+  stocktakeCounts  StocktakeCount[]
+  importRows       ImportRow[]
+  alerts           Alert[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([substanceId])
+  @@index([labId, status])
+  @@index([custodianId])
+  @@map("container")
+}
+
+// ---------------------------------------------------------------------------
+// Audit chain & inventory transactions
+// ---------------------------------------------------------------------------
+
+// Append-only (enforced by a Postgres trigger + REVOKE in a raw migration).
+// hash = sha256(prevHash \n seq \n canonicalJson({seq, eventType, actorId,
+// onBehalfSystem, entityType, entityId, payload, witnessId, createdAt})).
+model AuditEvent {
+  id             String   @id @default(cuid())
+  seq            BigInt   @unique // dense global sequence, serialized by advisory lock
+  eventType      String // "container.deduct", "auth.denied", "system.compat_recheck", ...
+  actorId        String?
+  onBehalfSystem Boolean  @default(false)
+  entityType     String // "container", "cabinet", "user", ...
+  entityId       String
+  payload        Json // before/after, reason, delta — canonicalized before hashing
+  witnessId      String?
+  prevHash       String   @unique
+  hash           String
+  createdAt      DateTime @default(now())
+
+  actor                User?                 @relation("actor", fields: [actorId], references: [id])
+  witness              User?                 @relation("witness", fields: [witnessId], references: [id])
+  inventoryTransaction InventoryTransaction?
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_event")
+}
+
+enum TransactionKind {
+  CHECK_IN
+  ADD
+  DEDUCT
+  CORRECT
+  TRANSFER
+  DISPOSE
+  REVERSAL
+}
+
+// Typed projection of quantity-affecting audit events, for queries and charts.
+model InventoryTransaction {
+  id              String          @id @default(cuid())
+  auditEventId    String          @unique
+  containerId     String
+  kind            TransactionKind
+  quantityBefore  Decimal
+  quantityAfter   Decimal
+  unit            CanonicalUnit
+  reason          String
+  projectCode     String?
+  reversedById    String?         @unique // the REVERSAL transaction that undid this one
+  reversibleUntil DateTime? // 15-minute compensating-reversal window
+  createdAt       DateTime        @default(now())
+
+  auditEvent AuditEvent            @relation(fields: [auditEventId], references: [id])
+  container  Container             @relation(fields: [containerId], references: [id])
+  reversedBy InventoryTransaction? @relation("reversal", fields: [reversedById], references: [id])
+  reverses   InventoryTransaction? @relation("reversal")
+
+  @@index([containerId, createdAt])
+  @@map("inventory_transaction")
+}
+
+// Project / cost-centre codes for the mandatory purpose field.
+model Project {
+  id       String  @id @default(cuid())
+  code     String  @unique // "44-B"
+  name     String // "Suzuki coupling"
+  isActive Boolean @default(true)
+
+  @@map("project")
+}
+
+// ---------------------------------------------------------------------------
+// Transfers
+// ---------------------------------------------------------------------------
+
+enum TransferRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
+model TransferRequest {
+  id                 String                @id @default(cuid())
+  containerId        String
+  requesterId        String
+  currentCustodianId String?
+  status             TransferRequestStatus @default(PENDING)
+  message            String?
+  resolvedAt         DateTime?
+  createdAt          DateTime              @default(now())
+
+  container Container @relation(fields: [containerId], references: [id])
+
+  @@index([currentCustodianId, status])
+  @@index([requesterId])
+  @@map("transfer_request")
+}
+
+// ---------------------------------------------------------------------------
+// Stocktake
+// ---------------------------------------------------------------------------
+
+enum StocktakeStatus {
+  OPEN
+  PAUSED
+  AWAITING_SIGNOFF
+  SIGNED_OFF
+  ABANDONED
+}
+
+model StocktakeSession {
+  id            String          @id @default(cuid())
+  labId         String
+  startedById   String
+  status        StocktakeStatus @default(OPEN)
+  signedOffById String?
+  startedAt     DateTime        @default(now())
+  signedOffAt   DateTime?
+
+  lab    Lab              @relation(fields: [labId], references: [id])
+  counts StocktakeCount[]
+
+  @@map("stocktake_session")
+}
+
+enum DiscrepancyKind {
+  NONE
+  MISMATCH
+  MISSING
+  UNEXPECTED
+  EXPIRED
+}
+
+enum DiscrepancyResolution {
+  CORRECTED
+  CLAIMED
+  ANNOTATED
+}
+
+model StocktakeCount {
+  id              String                 @id @default(cuid())
+  sessionId       String
+  containerId     String? // null for UNEXPECTED containers scanned from another lab
+  scannedCode     String
+  locationId      String?
+  countedQuantity Decimal?
+  countedById     String
+  discrepancy     DiscrepancyKind        @default(NONE)
+  resolution      DiscrepancyResolution?
+  note            String?
+  countedAt       DateTime               @default(now())
+
+  session   StocktakeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  container Container?       @relation(fields: [containerId], references: [id])
+
+  @@unique([sessionId, scannedCode])
+  @@map("stocktake_count")
+}
+
+// ---------------------------------------------------------------------------
+// Alerts
+// ---------------------------------------------------------------------------
+
+enum AlertKind {
+  EXPIRED
+  EXPIRING_SOON
+  BELOW_MIN
+  SDS_UNREAD
+  COMPAT_CONFLICT
+  QUANTITY_DRIFT
+}
+
+enum AlertStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+  SNOOZED
+}
+
+model Alert {
+  id           String      @id @default(cuid())
+  kind         AlertKind
+  status       AlertStatus @default(OPEN)
+  labId        String?
+  containerId  String?
+  substanceId  String?
+  locationId   String?
+  detail       Json // e.g. {"daysToExpiry": 6} — rendered on the worklist row
+  dedupeKey    String      @unique // kind + entity, so nightly upserts never duplicate
+  snoozedUntil DateTime?
+  resolvedAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  container Container? @relation(fields: [containerId], references: [id])
+
+  @@index([status, kind])
+  @@index([labId, status])
+  @@map("alert")
+}
+
+model AlertThresholdSetting {
+  id                 String @id @default(cuid())
+  labId              String @unique
+  expiryWarningDays  Int    @default(30)
+  lowStockPercent    Int    @default(25) // % of min level
+  sdsRereadDays      Int    @default(14)
+
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@map("alert_threshold_setting")
+}
+
+// ---------------------------------------------------------------------------
+// SDS documents
+// ---------------------------------------------------------------------------
+
+enum SdsStatus {
+  CURRENT
+  SUPERSEDED
+  EXPIRED
+  MISSING
+}
+
+model SdsDocument {
+  id           String    @id @default(cuid())
+  substanceId  String
+  supplier     String?
+  revision     String // e.g. "2026-03"
+  language     String    @default("EN")
+  issuedDate   DateTime?
+  fileKey      String? // path under FILE_STORAGE_ROOT; null = known-missing placeholder
+  status       SdsStatus @default(CURRENT)
+  supersedesId String?   @unique
+  changeSummary String? // what changed vs the superseded revision
+  createdAt    DateTime  @default(now())
+
+  substance    Substance        @relation(fields: [substanceId], references: [id], onDelete: Cascade)
+  supersedes   SdsDocument?     @relation("revisionChain", fields: [supersedesId], references: [id])
+  supersededBy SdsDocument?     @relation("revisionChain")
+  readReceipts SdsReadReceipt[]
+
+  @@index([substanceId, status])
+  @@map("sds_document")
+}
+
+model SdsReadReceipt {
+  id            String   @id @default(cuid())
+  sdsDocumentId String
+  userId        String
+  readAt        DateTime @default(now())
+
+  sdsDocument SdsDocument @relation(fields: [sdsDocumentId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sdsDocumentId, userId])
+  @@map("sds_read_receipt")
+}
+
+// ---------------------------------------------------------------------------
+// Legacy import provenance
+// ---------------------------------------------------------------------------
+
+enum ImportBatchStatus {
+  DRY_RUN
+  APPLIED
+  FAILED
+}
+
+model ImportBatch {
+  id        String            @id @default(cuid())
+  fileName  String
+  fileHash  String            @unique // sha256 — makes re-import of the same file a no-op
+  status    ImportBatchStatus
+  stats     Json
+  createdAt DateTime          @default(now())
+
+  rows ImportRow[]
+
+  @@map("import_batch")
+}
+
+enum ImportRowDisposition {
+  IMPORTED
+  MERGED_DUPLICATE
+  SKIPPED_PLACEHOLDER
+  SKIPPED_STRUCTURAL
+  ERROR
+}
+
+model ImportRow {
+  id          String               @id @default(cuid())
+  batchId     String
+  sheetName   String
+  rowIndex    Int
+  raw         Json // the original row, verbatim
+  subId       String?
+  disposition ImportRowDisposition
+  containerId String?
+  notes       String?
+
+  batch     ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  container Container?  @relation(fields: [containerId], references: [id])
+
+  @@map("import_row")
+}
+
+// ---------------------------------------------------------------------------
+// Worker bookkeeping
+// ---------------------------------------------------------------------------
+
+model JobRun {
+  id         String    @id @default(cuid())
+  jobName    String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  ok         Boolean?
+  summary    Json?
+  error      String?
+
+  @@index([jobName, startedAt])
+  @@map("job_run")
+}

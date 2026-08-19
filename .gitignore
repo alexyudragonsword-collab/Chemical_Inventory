@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# misc
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# local data
+/data/
+*.log
