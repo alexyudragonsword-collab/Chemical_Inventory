@@ -91,20 +91,34 @@ export async function adjustQuantity(opts: {
   if (!(amount > 0) && mode !== "CORRECT") throw new DomainError("Amount must be positive");
   if (amount < 0) throw new DomainError("Quantity cannot be negative");
 
+  // Authorize BEFORE the mutation transaction: a denied attempt must itself be
+  // audited, and that event has to survive the rollback of the business change
+  // (deck: "denied attempts are logged too").
+  {
+    const container = await loadContainerForUpdate(prisma, containerId);
+    const action = mode === "DEDUCT" ? "deduct" : mode === "ADD" ? "add" : "correct";
+    const accessMode = authorizeContainer(user, action, toAuthz(container));
+    if (accessMode !== "editable") {
+      await prisma.$transaction(async (tx) => {
+        await writeAuditEvent(tx, {
+          eventType: "auth.denied",
+          actorId: user.id,
+          entityType: "container",
+          entityId: container.id,
+          payload: { action, mode: accessMode, containerCode: container.code },
+        });
+      });
+      throw new AuthzError(accessMode, action);
+    }
+  }
+
   return prisma.$transaction(async (tx) => {
     const container = await loadContainerForUpdate(tx, containerId);
+    // Re-check inside the transaction: custody may have changed between the
+    // pre-flight read and the serialized write.
     const action = mode === "DEDUCT" ? "deduct" : mode === "ADD" ? "add" : "correct";
     const mode_ = authorizeContainer(user, action, toAuthz(container));
-    if (mode_ !== "editable") {
-      await writeAuditEvent(tx, {
-        eventType: "auth.denied",
-        actorId: user.id,
-        entityType: "container",
-        entityId: container.id,
-        payload: { action, mode: mode_, containerCode: container.code },
-      });
-      throw new AuthzError(mode_, action);
-    }
+    if (mode_ !== "editable") throw new AuthzError(mode_, action);
     if (container.status !== "ACTIVE" && container.status !== "EMPTY") {
       throw new DomainError(`Container is ${container.status.toLowerCase()}`);
     }

@@ -29,6 +29,40 @@ export function containerSearchWhere(q: string): Prisma.ContainerWhereInput {
   };
 }
 
+export type InventoryFilterParams = {
+  q?: string;
+  scope?: string;
+  hazard?: string;
+  status?: string;
+  lab?: string;
+};
+
+/** The inventory list / CSV export share this filter builder. */
+export function buildInventoryWhere(
+  user: SessionUser,
+  params: InventoryFilterParams,
+): Prisma.ContainerWhereInput {
+  const scopeMine = params.scope !== "all";
+  const now = new Date();
+  const soon = new Date(Date.now() + 30 * 86_400_000);
+  const statusWhere: Prisma.ContainerWhereInput =
+    params.status === "expiring"
+      ? { expiryDate: { gte: now, lte: soon } }
+      : params.status === "expired"
+        ? { expiryDate: { lt: now } }
+        : {};
+  return {
+    status: { notIn: ["DISPOSED"] },
+    AND: [
+      scopeMine ? custodyWhere(user) : {},
+      params.q ? containerSearchWhere(params.q) : {},
+      params.hazard && HAZARD_FILTERS[params.hazard] ? HAZARD_FILTERS[params.hazard] : {},
+      params.lab ? { lab: { code: params.lab } } : {},
+      statusWhere,
+    ],
+  };
+}
+
 export const HAZARD_FILTERS: Record<string, Prisma.ContainerWhereInput> = {
   flammable: { substance: { ghs: { storageClass: "FLAMMABLE" } } },
   toxic: { substance: { ghs: { storageClass: "TOXIC" } } },
