@@ -9,6 +9,7 @@
 - 踩过的坑（已修复）：pg_dump ≥15 会清空会话 search_path，恢复后同连接语句需重置；node-cron v4 ESM 的 import.meta.url 在 CJS bundle 中为 undefined（esbuild banner+define 修复）；pipefail 下 `sort|head` SIGPIPE。
 - Linux 端每次构建自动验证：恢复彩排 + 恢复后审计链校验 + 服务/worker 冒烟 + 清单断言；Windows 真机验收清单在包内 README-WINDOWS.md。
 - 源码：`deploy/windows/`；构建命令 `pnpm package:win -- --xlsx <file>`；zip 因附件上限拆 3 卷交付用户。
+- 补充交付：《ChemTrack安装使用指南.docx》（中文 Word，docx-js 生成，含 4 张界面截图 / 账号表 / 局域网模式 / 备份 / FAQ / 验收清单），随分卷一起分发给团队；本环境 LibreOffice 无法加载任何文件（渲染验证改用 XSD 校验 + mammoth→HTML→Chromium 截图目检）。
 
 ## 2026-08-19 · M1–M7 全量实现完成并推送
 
