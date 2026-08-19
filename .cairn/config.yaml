@@ -1,0 +1,22 @@
+version: 0.1
+project:
+  name: "ChemTrack"
+  summary: "实验室化学品在线库存管理系统：以容器为单位、custody 保管权模型、GHS 安全合规、哈希链审计；Next.js + PostgreSQL + Prisma。"
+cairn:
+  knowledge_dir: "cairn"
+  # Date of the skill spec this instance was initialized against, or last
+  # upgraded to. Stamped automatically by init; re-stamped after each
+  # instance upgrade.
+  skill_spec_date: "2026-08-07"
+  # git_policy: track | ignore | private_sync
+  git_policy: "track"
+  # language: en | zh | ... — language used when writing AGENTS.md/LOG.md/ROADMAP.md/topic notes
+  language: "zh"
+graduation:
+  # Deferred — no knowledge base connected yet ("try Cairn first, connect
+  # later"). Provider decisions are collected at the first graduation
+  # (see references/graduation.md → Deferred provider).
+  provider: none
+history:
+  # migration_mode: start_fresh | inventory_only | selective_migrate
+  migration_mode: "start_fresh"
