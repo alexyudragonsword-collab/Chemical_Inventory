@@ -192,6 +192,120 @@ export async function adjustQuantity(opts: {
   });
 }
 
+/** Move custody of a container to another user (and their lab, if given). */
+export async function transferCustody(opts: {
+  user: SessionUser;
+  containerId: string;
+  toUserId: string;
+  toLabId?: string;
+  reason: string;
+  requestId?: string;
+  witnessId?: string;
+}) {
+  const { user, containerId, toUserId, reason } = opts;
+  if (!reason.trim()) throw new DomainError("Reason is required");
+
+  return prisma.$transaction(async (tx) => {
+    const container = await loadContainerForUpdate(tx, containerId);
+    const mode = authorizeContainer(user, "transfer", toAuthz(container));
+    if (mode !== "editable") throw new AuthzError(mode, "transfer");
+
+    const toUser = await tx.user.findUnique({ where: { id: toUserId } });
+    if (!toUser || !toUser.isActive) throw new DomainError("Receiving user not found or inactive");
+
+    const toLabId = opts.toLabId ?? container.labId;
+    const movingLabs = toLabId !== container.labId;
+
+    await writeAuditEvent(tx, {
+      eventType: "container.transfer",
+      actorId: user.id,
+      entityType: "container",
+      entityId: container.id,
+      witnessId: opts.witnessId ?? null,
+      witnessRule: { controlled: container.substance.isControlled },
+      payload: {
+        containerCode: container.code,
+        from: container.custodianId,
+        to: toUserId,
+        fromLab: container.labId,
+        toLab: toLabId,
+        reason,
+        requestId: opts.requestId ?? null,
+      },
+    });
+
+    await tx.container.update({
+      where: { id: container.id },
+      data: {
+        custodianId: toUserId,
+        labId: toLabId,
+        // A container that changes lab loses its shelf until re-assigned.
+        locationId: movingLabs ? null : container.locationId,
+      },
+    });
+    await tx.labMembership.upsert({
+      where: { userId_labId: { userId: toUserId, labId: toLabId } },
+      update: {},
+      create: { userId: toUserId, labId: toLabId },
+    });
+
+    return { toUserName: toUser.name };
+  });
+}
+
+/** Formal disposal: quantity to zero, status DISPOSED, container stays on record. */
+export async function disposeContainer(opts: {
+  user: SessionUser;
+  containerId: string;
+  reason: string;
+  wasteStream?: string;
+  witnessId?: string;
+}) {
+  const { user, containerId, reason } = opts;
+  if (!reason.trim()) throw new DomainError("Reason is required");
+
+  return prisma.$transaction(async (tx) => {
+    const container = await loadContainerForUpdate(tx, containerId);
+    const mode = authorizeContainer(user, "dispose", toAuthz(container));
+    if (mode !== "editable") throw new AuthzError(mode, "dispose");
+    if (container.status === "DISPOSED") throw new DomainError("Already disposed");
+
+    const before = container.currentQuantity.toNumber();
+    const event = await writeAuditEvent(tx, {
+      eventType: "container.dispose",
+      actorId: user.id,
+      entityType: "container",
+      entityId: container.id,
+      witnessId: opts.witnessId ?? null,
+      witnessRule: { controlled: container.substance.isControlled },
+      payload: {
+        containerCode: container.code,
+        substance: container.substance.name,
+        before,
+        after: 0,
+        unit: container.unit,
+        reason,
+        wasteStream: opts.wasteStream ?? null,
+      },
+    });
+    await tx.inventoryTransaction.create({
+      data: {
+        auditEventId: event.id,
+        containerId: container.id,
+        kind: "DISPOSE",
+        quantityBefore: new Prisma.Decimal(before),
+        quantityAfter: new Prisma.Decimal(0),
+        unit: container.unit,
+        reason,
+      },
+    });
+    await tx.container.update({
+      where: { id: container.id },
+      data: { currentQuantity: new Prisma.Decimal(0), status: "DISPOSED" },
+    });
+  });
+}
+
 /**
  * Compensating reversal of a recent transaction (fat-finger cover, deck: 15
  * minutes). Never mutates the original record — appends a REVERSAL.
