@@ -91,7 +91,8 @@ async function main() {
   }
 }
 
-// Run as a CLI only when executed directly.
-if (process.argv[1]?.endsWith("verify-audit-chain.ts")) {
+// Run as a CLI only when executed directly — either as this TS file (tsx) or
+// as the esbuild bundle shipped in the Windows package (verify-audit.cjs).
+if (/verify-audit(-chain)?\.(ts|cjs)$/.test(process.argv[1] ?? "")) {
   main();
 }

@@ -11,6 +11,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "windows" is included so the Windows offline bundle (deploy/windows/)
+  // ships query_engine-windows.dll.node inside the standalone output.
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {

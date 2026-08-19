@@ -11,6 +11,7 @@
 - [x] M5 安全：告警引擎、相容性矩阵、GHS 编辑器、SDS 库、worker
 - [x] M6 盘点与管理：盘点会话、用户/权限、实验室/位置、审计查看器
 - [x] M7 报表与收尾：四个标准报表、导出、定时邮件、CI、README
+- [x] M8 Windows 一键安装离线包（`deploy/windows/`，`pnpm package:win`）——待团队 Windows 真机按 README-WINDOWS.md 验收清单确认
 - [ ] 数据治理：Import fixup 清零（221 个待指派保管人、1 个歧义单位、9 个残缺位置、CAS 补录）
 - [ ] 真实人员名册建号与 lab membership 配置
 - [ ] 内网服务器 Docker 部署 + 备份计划（pgdata + files 卷）

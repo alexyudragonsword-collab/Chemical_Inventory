@@ -27,3 +27,8 @@ test-results/
 # local data
 /data/
 *.log
+
+# windows packaging artifacts
+deploy/windows/cache/
+deploy/windows/stage/
+ChemTrack-*-win64.zip
