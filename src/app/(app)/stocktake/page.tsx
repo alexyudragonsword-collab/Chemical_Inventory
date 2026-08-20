@@ -55,7 +55,7 @@ export default async function StocktakeListPage() {
         )}
       </div>
 
-      <div className="mt-5 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-5 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">

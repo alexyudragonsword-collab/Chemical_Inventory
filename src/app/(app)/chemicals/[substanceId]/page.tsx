@@ -131,7 +131,7 @@ export default async function ChemicalDetailPage({
       </div>
 
       {/* Hazard block */}
-      <section className="mt-5 rounded-lg border border-line bg-white p-4">
+      <section className="mt-5 rounded-lg border border-line bg-card p-4">
         <div className="flex flex-wrap items-start gap-6">
           <GhsPictogramGrid active={substance.ghs?.pictograms ?? []} />
           <div className="min-w-0 flex-1">
@@ -160,7 +160,7 @@ export default async function ChemicalDetailPage({
 
       {/* Properties & handling */}
       <section className="mt-4 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-line bg-white p-4">
+        <div className="rounded-lg border border-line bg-card p-4">
           <h2 className="text-sm font-semibold text-teal-deep">Properties &amp; handling</h2>
           <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <Prop label="Storage class" value={substance.ghs?.storageClass ?? "Not classified"} />
@@ -188,7 +188,7 @@ export default async function ChemicalDetailPage({
         </div>
 
         {/* Consumption chart */}
-        <div className="rounded-lg border border-line bg-white p-4">
+        <div className="rounded-lg border border-line bg-card p-4">
           <h2 className="text-sm font-semibold text-teal-deep">
             Consumption — last 6 months (my custody)
           </h2>
@@ -210,7 +210,7 @@ export default async function ChemicalDetailPage({
       </section>
 
       {/* Containers */}
-      <section className="mt-4 rounded-lg border border-line bg-white">
+      <section className="mt-4 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
           Containers — {substance.containers.length} across {labCount} lab{labCount === 1 ? "" : "s"}
         </h2>
@@ -316,7 +316,7 @@ export default async function ChemicalDetailPage({
       </section>
 
       {/* Documents */}
-      <section className="mt-4 rounded-lg border border-line bg-white p-4">
+      <section className="mt-4 rounded-lg border border-line bg-card p-4">
         <h2 className="text-sm font-semibold text-teal-deep">Documents</h2>
         {substance.sdsDocuments.length === 0 ? (
           <p className="mt-2 text-sm text-warning">

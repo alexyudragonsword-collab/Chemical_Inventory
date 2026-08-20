@@ -96,7 +96,7 @@ export function CheckOutPanel({
   }
 
   return (
-    <div className="mt-5 rounded-lg border border-line bg-white">
+    <div className="mt-5 rounded-lg border border-line bg-card">
       {/* Scanned context */}
       <div className="flex flex-wrap items-start gap-4 border-b border-line p-4">
         <div className="min-w-0 flex-1">
@@ -171,7 +171,7 @@ export function CheckOutPanel({
             }}
             disabled={m !== "editable"}
             className={`rounded-t-md px-3 py-2 text-sm font-medium disabled:opacity-40 ${
-              tab === key ? "border border-b-0 border-line bg-white text-teal-deep" : "text-muted hover:text-ink"
+              tab === key ? "border border-b-0 border-line bg-card text-teal-deep" : "text-muted hover:text-ink"
             }`}
           >
             {label}
@@ -191,7 +191,7 @@ export function CheckOutPanel({
                     if (r.ok) setReversed(true);
                   })
                 }
-                className="ml-3 rounded border border-line bg-white px-2 py-0.5 text-xs text-muted hover:bg-paper"
+                className="ml-3 rounded border border-line bg-card px-2 py-0.5 text-xs text-muted hover:bg-paper"
               >
                 Reverse
               </button>

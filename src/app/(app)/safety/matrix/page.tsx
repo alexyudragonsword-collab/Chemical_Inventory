@@ -105,7 +105,7 @@ export default async function MatrixPage({
             className={`rounded-full border px-3 py-1 text-xs font-medium ${
               selected?.id === c.id
                 ? "border-teal bg-teal-soft text-teal-deep"
-                : "border-line bg-white text-muted hover:bg-paper"
+                : "border-line bg-card text-muted hover:bg-paper"
             }`}
           >
             {c.lab.code} · {c.code}
@@ -131,7 +131,7 @@ export default async function MatrixPage({
             {scan.conflicts.length > 5 && <li>… and {scan.conflicts.length - 5} more pairs</li>}
           </ul>
           {suggestion && (
-            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-line bg-white px-3 py-2">
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-line bg-card px-3 py-2">
               <span className="text-sm">
                 Suggested: move <strong>{suggestion.container.code}</strong> (
                 {suggestion.container.substance.name}) to{" "}
@@ -157,7 +157,7 @@ export default async function MatrixPage({
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         {/* Segregation matrix */}
-        <section className="rounded-lg border border-line bg-white p-4">
+        <section className="rounded-lg border border-line bg-card p-4">
           <h2 className="text-sm font-semibold text-teal-deep">Segregation matrix</h2>
           <table className="mt-2 text-center text-sm">
             <thead>
@@ -201,7 +201,7 @@ export default async function MatrixPage({
         </section>
 
         {/* Cabinet contents */}
-        <section className="rounded-lg border border-line bg-white">
+        <section className="rounded-lg border border-line bg-card">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <h2 className="text-sm font-semibold text-teal-deep">
               Contents — {scan?.containerCount ?? 0} containers

@@ -34,7 +34,7 @@ export function SignInForm({ labs }: { labs: { id: string; code: string; name: s
           required
           autoComplete="email"
           placeholder="l.wong@university.edu"
-          className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink normal-case focus:border-teal focus:ring-2 focus:ring-teal/30 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-line bg-card px-3 py-2 text-sm text-ink normal-case focus:border-teal focus:ring-2 focus:ring-teal/30 focus:outline-none"
         />
       </label>
 
@@ -45,7 +45,7 @@ export function SignInForm({ labs }: { labs: { id: string; code: string; name: s
           type="password"
           required
           autoComplete="current-password"
-          className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm focus:border-teal focus:ring-2 focus:ring-teal/30 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-line bg-card px-3 py-2 text-sm focus:border-teal focus:ring-2 focus:ring-teal/30 focus:outline-none"
         />
       </label>
 
@@ -53,7 +53,7 @@ export function SignInForm({ labs }: { labs: { id: string; code: string; name: s
         Default workspace
         <select
           name="workspace"
-          className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
+          className="mt-1 w-full rounded-md border border-line bg-card px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
           defaultValue=""
         >
           <option value="">My default lab</option>

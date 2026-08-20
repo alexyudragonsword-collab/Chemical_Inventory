@@ -98,7 +98,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         {/* Solvent consumption chart */}
-        <section className="rounded-lg border border-line bg-white p-4">
+        <section className="rounded-lg border border-line bg-card p-4">
           <h2 className="text-sm font-semibold text-teal-deep">Solvent consumption by month (litres)</h2>
           <div className="mt-3 flex h-36 items-end gap-2">
             {consumption.monthlySolventLitres.length === 0 && (
@@ -115,7 +115,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </section>
 
         {/* Top consumption rows */}
-        <section className="rounded-lg border border-line bg-white">
+        <section className="rounded-lg border border-line bg-card">
           <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
             Top usage — chemical → project
           </h2>
@@ -140,7 +140,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </section>
 
         {/* Waste by stream */}
-        <section className="rounded-lg border border-line bg-white">
+        <section className="rounded-lg border border-line bg-card">
           <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
             Disposals by waste stream
           </h2>
@@ -163,7 +163,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </section>
 
         {/* Expiry buckets */}
-        <section className="rounded-lg border border-line bg-white p-4">
+        <section className="rounded-lg border border-line bg-card p-4">
           <h2 className="text-sm font-semibold text-teal-deep">Expiry profile — {health.total} active containers</h2>
           <dl className="mt-2 grid grid-cols-3 gap-3 text-sm">
             <Bucket label="Expired" value={health.buckets.expired} tone="text-danger" />
@@ -191,7 +191,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
 function ReportCard({ title, detail, csv, xlsx }: { title: string; detail: string; csv: string; xlsx: string }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-4">
+    <div className="rounded-lg border border-line bg-card p-4">
       <div className="text-sm font-semibold text-teal-deep">{title}</div>
       <div className="mt-1 text-xs text-muted">{detail}</div>
       <div className="mt-3 flex gap-1.5">

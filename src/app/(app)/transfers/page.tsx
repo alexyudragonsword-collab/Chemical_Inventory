@@ -47,7 +47,7 @@ export default async function TransfersPage() {
       <h1 className="text-xl font-semibold text-teal-deep">Transfers</h1>
       <p className="text-sm text-muted">Custody transfer requests, incoming and outgoing</p>
 
-      <section className="mt-5 rounded-lg border border-line bg-white">
+      <section className="mt-5 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
           Incoming — awaiting your decision ({incoming.length})
         </h2>
@@ -86,7 +86,7 @@ export default async function TransfersPage() {
         </ul>
       </section>
 
-      <section className="mt-5 rounded-lg border border-line bg-white">
+      <section className="mt-5 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
           My requests
         </h2>

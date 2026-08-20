@@ -96,7 +96,7 @@ export default async function StocktakeSessionPage({
       </p>
 
       {/* Progress */}
-      <div className="mt-4 rounded-lg border border-line bg-white p-4">
+      <div className="mt-4 rounded-lg border border-line bg-card p-4">
         <div className="flex items-center justify-between text-sm">
           <span>
             <strong>{matched}</strong> matched · <strong className="text-warning">{discrepancies.length}</strong>{" "}
@@ -143,7 +143,7 @@ export default async function StocktakeSessionPage({
         <FilterChip href={`/stocktake/${session.id}?filter=expired`} label={`Expired ${session.counts.filter((c) => c.discrepancy === "EXPIRED").length}`} active={filter === "expired"} />
       </div>
 
-      <div className="mt-2 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-2 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">
@@ -213,7 +213,7 @@ export default async function StocktakeSessionPage({
       </div>
 
       {session.status !== "SIGNED_OFF" && (
-        <div className="mt-4 flex items-center justify-between rounded-lg border border-line bg-white px-4 py-3">
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-line bg-card px-4 py-3">
           <span className="text-sm text-muted">
             {unresolved.length > 0
               ? `${unresolved.length} discrepanc${unresolved.length === 1 ? "y" : "ies"} must be resolved or annotated before sign-off.`
@@ -241,7 +241,7 @@ function FilterChip({ href, label, active }: { href: string; label: string; acti
     <a
       href={href}
       className={`rounded-full border px-3 py-1 font-medium ${
-        active ? "border-teal bg-teal-soft text-teal-deep" : "border-line bg-white text-muted hover:bg-paper"
+        active ? "border-teal bg-teal-soft text-teal-deep" : "border-line bg-card text-muted hover:bg-paper"
       }`}
     >
       {label}

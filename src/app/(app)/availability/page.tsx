@@ -56,7 +56,7 @@ export default async function AvailabilityPage({
           name="q"
           defaultValue={params.q ?? ""}
           placeholder="⌕  Substance name or CAS"
-          className="flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm focus:border-teal focus:outline-none"
+          className="flex-1 rounded-md border border-line bg-card px-3 py-2 text-sm focus:border-teal focus:outline-none"
         />
         <button className="rounded-md bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep">
           Search
@@ -64,7 +64,7 @@ export default async function AvailabilityPage({
       </form>
 
       {!substance && matches.length > 1 && (
-        <ul className="mt-4 max-w-md divide-y divide-line rounded-lg border border-line bg-white">
+        <ul className="mt-4 max-w-md divide-y divide-line rounded-lg border border-line bg-card">
           {matches.map((m) => (
             <li key={m.id}>
               <Link href={`/availability?substance=${m.id}`} className="block px-4 py-2 text-sm hover:bg-paper">
@@ -126,7 +126,7 @@ async function Holdings({
 
   return (
     <div className="mt-5">
-      <div className="flex items-center gap-4 rounded-lg border border-line bg-white px-4 py-3">
+      <div className="flex items-center gap-4 rounded-lg border border-line bg-card px-4 py-3">
         <div>
           <div className="text-xs tracking-wide text-muted uppercase">Total across estate</div>
           <div className="text-2xl font-semibold text-ink">
@@ -158,7 +158,7 @@ async function Holdings({
             }
           }
           return (
-            <details key={labId} className="rounded-lg border border-line bg-white" open={mine}>
+            <details key={labId} className="rounded-lg border border-line bg-card" open={mine}>
               <summary className="flex cursor-pointer items-center gap-3 px-4 py-3">
                 <span className="font-medium">{lab.code}</span>
                 <span className="text-xs text-muted">{lab.name}</span>
@@ -235,7 +235,7 @@ async function Holdings({
           );
         })}
         {byLab.size === 0 && (
-          <p className="rounded-lg border border-line bg-white px-4 py-8 text-center text-sm text-muted">
+          <p className="rounded-lg border border-line bg-card px-4 py-8 text-center text-sm text-muted">
             No containers of this substance anywhere in the estate.
           </p>
         )}

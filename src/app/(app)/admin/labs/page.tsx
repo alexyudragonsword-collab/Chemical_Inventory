@@ -36,14 +36,14 @@ export default async function LabsAdminPage() {
       <h1 className="text-xl font-semibold text-teal-deep">Labs &amp; locations</h1>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <form action={createSiteAction} className="flex items-end gap-2 rounded-lg border border-line bg-white p-3">
+        <form action={createSiteAction} className="flex items-end gap-2 rounded-lg border border-line bg-card p-3">
           <label className="text-xs font-semibold tracking-wide text-muted uppercase">
             New site
             <input name="name" placeholder="Site name" className="input mt-1 w-40" />
           </label>
           <button className="rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white hover:bg-teal-deep">Add</button>
         </form>
-        <form action={createLabAction} className="flex items-end gap-2 rounded-lg border border-line bg-white p-3">
+        <form action={createLabAction} className="flex items-end gap-2 rounded-lg border border-line bg-card p-3">
           <label className="text-xs font-semibold tracking-wide text-muted uppercase">
             New lab
             <select name="siteId" className="input mt-1 w-36">
@@ -64,7 +64,7 @@ export default async function LabsAdminPage() {
             <h2 className="text-sm font-semibold text-muted">{site.name}</h2>
             <div className="mt-2 space-y-3">
               {site.labs.map((lab) => (
-                <details key={lab.id} className="rounded-lg border border-line bg-white">
+                <details key={lab.id} className="rounded-lg border border-line bg-card">
                   <summary className="flex cursor-pointer items-center gap-3 px-4 py-3">
                     <span className="font-medium">{lab.code}</span>
                     <span className="text-sm text-muted">{lab.name}</span>

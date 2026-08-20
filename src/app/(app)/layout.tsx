@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { APPEARANCE_COOKIE, normalizeAppearance } from "@/lib/appearance";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/server/session";
 import { can } from "@/server/authz";
+import { AppearanceSwitcher } from "@/components/appearance-switcher";
 import { GlobalSearch } from "@/components/global-search";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { signOutAction, switchWorkspaceAction } from "./actions";
@@ -10,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const appearance = normalizeAppearance((await cookies()).get(APPEARANCE_COOKIE)?.value);
 
   const [workspaceLab, memberLabs, custodyCount] = await Promise.all([
     user.workspaceLabId
@@ -39,19 +43,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen">
-      <aside className="no-print flex w-52 shrink-0 flex-col bg-teal-deep text-white">
+      <aside className="no-print flex w-52 shrink-0 flex-col bg-nav text-nav-fg">
         <Link href="/dashboard" className="flex items-center gap-2.5 px-4 py-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-teal text-sm font-bold">
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-nav-accent text-sm font-bold text-white">
             C
           </span>
           <span className="text-lg font-semibold tracking-tight">ChemTrack</span>
         </Link>
         <SidebarNav showAdmin={showAdmin} />
-        <div className="mt-auto border-t border-white/10 p-4">
+        <div className="mt-auto border-t border-nav-line p-4">
           <div className="text-sm font-medium">{user.name}</div>
-          <div className="text-xs text-white/60">{roleLabel(user.role)}</div>
+          <div className="text-xs text-nav-muted">{roleLabel(user.role)}</div>
           <form action={signOutAction}>
-            <button className="mt-2 text-xs text-white/60 underline-offset-2 hover:text-white hover:underline">
+            <button className="mt-2 text-xs text-nav-muted underline-offset-2 hover:text-nav-fg hover:underline">
               Sign out
             </button>
           </form>
@@ -62,13 +66,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <header className="no-print flex items-center gap-4 border-b border-line bg-card px-6 py-3">
           <GlobalSearch />
           <div className="ml-auto flex items-center gap-3 text-sm">
+            <AppearanceSwitcher current={appearance} />
             {memberLabs.length > 0 && (
               <form action={switchWorkspaceAction} className="flex items-center gap-2">
                 <span className="text-xs tracking-wide text-muted uppercase">Workspace</span>
                 <select
                   name="labId"
                   defaultValue={workspaceLab?.id ?? ""}
-                  className="rounded-md border border-line bg-white px-2 py-1 text-sm"
+                  className="rounded-md border border-line bg-card px-2 py-1 text-sm"
                 >
                   {memberLabs.map((lab) => (
                     <option key={lab.id} value={lab.id}>

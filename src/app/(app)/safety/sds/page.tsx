@@ -61,7 +61,7 @@ export default async function SdsLibraryPage({
       </p>
 
       {/* Coverage stacked bar */}
-      <div className="mt-4 rounded-lg border border-line bg-white p-4">
+      <div className="mt-4 rounded-lg border border-line bg-card p-4">
         <div className="flex h-4 overflow-hidden rounded-full">
           <div className="bg-ok" style={{ width: `${(withCurrent / Math.max(1, total)) * 100}%` }} title={`Current: ${withCurrent}`} />
           <div className="bg-warning" style={{ width: `${(expired / Math.max(1, total)) * 100}%` }} title={`Expired: ${expired}`} />
@@ -76,7 +76,7 @@ export default async function SdsLibraryPage({
       </div>
 
       {/* Upload */}
-      <details className="mt-4 rounded-lg border border-line bg-white">
+      <details className="mt-4 rounded-lg border border-line bg-card">
         <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-teal-deep">
           + Upload SDS
         </summary>
@@ -117,7 +117,7 @@ export default async function SdsLibraryPage({
       </form>
 
       {/* Library table */}
-      <div className="mt-3 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-3 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">

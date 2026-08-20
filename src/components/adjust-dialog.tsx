@@ -97,7 +97,7 @@ export function AdjustDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl"
+        className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -155,7 +155,7 @@ export function AdjustDialog({
                   key={m}
                   onClick={() => setMode(m)}
                   className={`flex-1 rounded px-3 py-1.5 text-sm font-medium ${
-                    mode === m ? "bg-white text-teal-deep shadow-sm" : "text-muted hover:text-ink"
+                    mode === m ? "bg-card text-teal-deep shadow-sm" : "text-muted hover:text-ink"
                   }`}
                 >
                   {m === "DEDUCT" ? "Deduct" : m === "ADD" ? "Add" : "Correct count"}
@@ -253,7 +253,7 @@ export function AdjustDialog({
                 <select
                   value={projectCode}
                   onChange={(e) => setProjectCode(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-line bg-white px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
+                  className="mt-1 w-full rounded-md border border-line bg-card px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
                 >
                   <option value="">—</option>
                   {projects.map((p) => (

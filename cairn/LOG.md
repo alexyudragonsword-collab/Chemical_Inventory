@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-20 · M9 三套可切换外观（纯视觉，不动数据）
+
+- 新增外观系统：默认 ChemTrack 之外提供 流光玻璃（环境色渐变+毛玻璃+柔和层级）、Notion（浅灰侧栏+纯平表面+低饱和状态色+紧凑间距）、Neo-Brutalism（黄色侧栏+方角硬边框+偏移硬阴影+机械按压反馈）。
+- 机制：外观存 cookie → `html[data-appearance]` → 覆盖 Tailwind v4 CSS 令牌（颜色/圆角/`--spacing`）+ 少量结构规则；切换只改 CSS，业务数据零接触。
+- 配套重构：全站 `bg-white` 收敛为 `bg-card` 令牌；侧栏/头部改用 nav-* 语义令牌（浅色/黄色侧栏因此纯靠换令牌实现）。
+- 验证：四外观 × Dashboard/Inventory 截图目检、56 测试通过、默认外观零回归。切换器在顶栏 "Look" 下拉。
+
 ## 2026-08-19 · M8 Windows 一键安装离线包完成并交付
 
 - 自包含 win64 zip（85MB）：内置 Node 22 运行时 + zonky 便携版 PostgreSQL 16 + 拍平的 standalone 应用 + esbuild 工具 bundle + 预制数据库快照（种子 + 479 条真实旧数据导入）。

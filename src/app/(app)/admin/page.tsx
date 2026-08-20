@@ -44,7 +44,7 @@ export default async function AdminPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="rounded-lg border border-line bg-white p-4 hover:border-teal"
+            className="rounded-lg border border-line bg-card p-4 hover:border-teal"
           >
             <div className="text-sm font-semibold text-teal-deep">{card.title}</div>
             <div className="mt-1 text-xs text-muted">{card.detail}</div>

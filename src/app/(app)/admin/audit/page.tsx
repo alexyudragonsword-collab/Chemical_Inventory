@@ -67,7 +67,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           <VerifyIntegrityButton />
           <a
             href="/api/export/audit"
-            className="rounded-md border border-line bg-white px-3 py-1.5 text-sm text-muted hover:bg-paper"
+            className="rounded-md border border-line bg-card px-3 py-1.5 text-sm text-muted hover:bg-paper"
           >
             Export CSV
           </a>
@@ -113,7 +113,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </button>
       </form>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">

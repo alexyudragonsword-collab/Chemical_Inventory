@@ -84,7 +84,7 @@ export default async function ClassificationPage({
           <form action="/safety/classification" className="flex gap-1">
             <input name="q" defaultValue={params.q ?? ""} placeholder="⌕ Name or CAS" className="input" />
           </form>
-          <ul className="mt-2 max-h-[32rem] divide-y divide-line overflow-y-auto rounded-lg border border-line bg-white">
+          <ul className="mt-2 max-h-[32rem] divide-y divide-line overflow-y-auto rounded-lg border border-line bg-card">
             {list.map((s) => (
               <li key={s.id}>
                 <Link
@@ -104,7 +104,7 @@ export default async function ClassificationPage({
         {/* Editor */}
         {substance ? (
           <div>
-            <form action={saveClassificationAction} className="rounded-lg border border-line bg-white p-4">
+            <form action={saveClassificationAction} className="rounded-lg border border-line bg-card p-4">
               <input type="hidden" name="substanceId" value={substance.id} />
               <h2 className="text-sm font-semibold text-teal-deep">
                 Pictograms — {editable ? "tap to toggle" : "read-only"}
@@ -178,7 +178,7 @@ export default async function ClassificationPage({
                   ["P", "Precautionary statements", substance.ghs?.pStatements ?? [], pRef],
                 ] as const
               ).map(([kind, title, statements, ref]) => (
-                <section key={kind} className="rounded-lg border border-line bg-white">
+                <section key={kind} className="rounded-lg border border-line bg-card">
                   <h3 className="border-b border-line px-4 py-2.5 text-sm font-semibold text-teal-deep">
                     {title}
                   </h3>
@@ -239,7 +239,7 @@ export default async function ClassificationPage({
             </div>
           </div>
         ) : (
-          <p className="rounded-lg border border-line bg-white px-4 py-16 text-center text-sm text-muted">
+          <p className="rounded-lg border border-line bg-card px-4 py-16 text-center text-sm text-muted">
             Pick a substance to view or edit its classification. Unclassified substances sort first.
           </p>
         )}

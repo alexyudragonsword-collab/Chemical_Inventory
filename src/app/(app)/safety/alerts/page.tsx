@@ -79,7 +79,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
       className={`rounded-full border px-3 py-1 text-xs font-medium ${
         params.filter === filter || (!params.filter && !filter)
           ? "border-teal bg-teal-soft text-teal-deep"
-          : "border-line bg-white text-muted hover:bg-paper"
+          : "border-line bg-card text-muted hover:bg-paper"
       }`}
     >
       {label}
@@ -96,7 +96,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
           </p>
         </div>
         <form action={refreshAlertsAction}>
-          <button className="rounded-md border border-line bg-white px-3 py-1.5 text-sm text-muted hover:bg-paper">
+          <button className="rounded-md border border-line bg-card px-3 py-1.5 text-sm text-muted hover:bg-paper">
             Re-run checks now
           </button>
         </form>
@@ -125,7 +125,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
         </Link>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-3 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">
@@ -185,7 +185,7 @@ export default async function AlertsPage({ searchParams }: { searchParams: Promi
 
 function Count({ label, value, tone, note }: { label: string; value: number; tone: PillTone; note: string }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-3">
+    <div className="rounded-lg border border-line bg-card p-3">
       <div className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</div>
       <div className="mt-0.5 text-2xl font-semibold">{value}</div>
       <div className="text-xs text-muted">{note}</div>

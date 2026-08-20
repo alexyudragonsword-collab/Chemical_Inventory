@@ -31,7 +31,7 @@ export function ScanInput({
         ref={ref}
         autoFocus={autoFocus}
         placeholder={placeholder}
-        className="flex-1 rounded-md border border-line bg-white px-3 py-2 text-sm focus:border-teal focus:ring-2 focus:ring-teal/20 focus:outline-none"
+        className="flex-1 rounded-md border border-line bg-card px-3 py-2 text-sm focus:border-teal focus:ring-2 focus:ring-teal/20 focus:outline-none"
       />
       <button className="rounded-md bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep">
         Open

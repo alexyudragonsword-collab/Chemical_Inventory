@@ -76,7 +76,7 @@ export default async function InventoryPage({
       className={`rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap ${
         active
           ? "border-accent bg-accent-soft text-accent"
-          : "border-line bg-white text-muted hover:bg-paper"
+          : "border-line bg-card text-muted hover:bg-paper"
       }`}
     >
       {label}
@@ -106,7 +106,7 @@ export default async function InventoryPage({
           href={`/api/export/csv?${new URLSearchParams(
             Object.entries(params).filter(([, v]) => v) as [string, string][],
           )}`}
-          className="rounded-md border border-line bg-white px-3 py-1.5 text-sm text-muted hover:bg-paper"
+          className="rounded-md border border-line bg-card px-3 py-1.5 text-sm text-muted hover:bg-paper"
         >
           Export CSV
         </a>
@@ -150,7 +150,7 @@ export default async function InventoryPage({
       )}
 
       {/* Table */}
-      <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">

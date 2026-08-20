@@ -117,7 +117,7 @@ export default async function DashboardPage() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         {/* Needs your action */}
-        <section className="rounded-lg border border-line bg-white">
+        <section className="rounded-lg border border-line bg-card">
           <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
             Needs your action
           </h2>
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Recent activity */}
-        <section className="rounded-lg border border-line bg-white">
+        <section className="rounded-lg border border-line bg-card">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <h2 className="text-sm font-semibold text-teal-deep">Recent activity in my custody</h2>
             <Link href="/inventory" className="text-xs text-teal hover:underline">
@@ -246,7 +246,7 @@ function Kpi({
   const noteColor =
     tone === "warning" ? "text-warning" : tone === "ok" ? "text-ok" : tone === "info" ? "text-info" : "text-muted";
   return (
-    <Link href={href} className="rounded-lg border border-line bg-white p-4 hover:border-teal">
+    <Link href={href} className="rounded-lg border border-line bg-card p-4 hover:border-teal">
       <div className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</div>
       <div className="mt-1 text-3xl font-semibold text-ink">{value}</div>
       <div className={`mt-1 text-xs ${noteColor}`}>{note}</div>

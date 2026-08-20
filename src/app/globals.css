@@ -1,13 +1,19 @@
 @import "tailwindcss";
 
-/* ChemTrack design tokens — from the UI design review deck. */
+/* ChemTrack design tokens — from the UI design review deck.
+ *
+ * Appearance system: every color below is a token, and the three alternative
+ * appearances (glass / notion / brutal) work by overriding these tokens under
+ * html[data-appearance="…"] plus a few structural rules. Switching appearance
+ * changes CSS only — it never touches business data.
+ */
 @theme {
   --color-ink: #10242b; /* body text */
   --color-muted: #5c7079; /* secondary text */
   --color-line: #dce4e7; /* borders */
   --color-paper: #f4f7f8; /* page background */
-  --color-card: #ffffff;
-  --color-teal-deep: #0e4c5c; /* nav, headings */
+  --color-card: #ffffff; /* surfaces (cards, tables, dialogs, header) */
+  --color-teal-deep: #0e4c5c; /* headings */
   --color-teal: #12a594; /* primary action */
   --color-teal-soft: #e3f4f1;
   --color-accent: #e2542d; /* scope / my custody */
@@ -24,6 +30,14 @@
   --color-restricted: #6d28d9; /* controlled / licensed */
   --color-restricted-soft: #f1eafd;
 
+  /* Sidebar / navigation surface */
+  --color-nav: #0e4c5c;
+  --color-nav-fg: #ffffff;
+  --color-nav-muted: rgba(255, 255, 255, 0.68);
+  --color-nav-active: rgba(255, 255, 255, 0.15);
+  --color-nav-line: rgba(255, 255, 255, 0.12);
+  --color-nav-accent: #12a594; /* logo chip */
+
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
@@ -34,9 +48,9 @@ body {
 
 .input {
   width: 100%;
-  border-radius: 0.375rem;
+  border-radius: var(--radius-md, 0.375rem);
   border: 1px solid var(--color-line);
-  background: white;
+  background: var(--color-card);
   padding: 0.4rem 0.65rem;
   font-size: 0.875rem;
   text-transform: none;
@@ -56,4 +70,163 @@ body {
   .no-print {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+ * Appearance: Liquid Glass — ambient color, translucent materials, soft
+ * spatial layering.
+ * ========================================================================== */
+html[data-appearance="glass"] {
+  --color-paper: rgba(240, 246, 248, 0.55);
+  --color-card: rgba(255, 255, 255, 0.6);
+  --color-line: rgba(14, 76, 92, 0.14);
+  --color-teal-soft: rgba(18, 165, 148, 0.16);
+  --color-accent-soft: rgba(226, 84, 45, 0.14);
+  --color-danger-soft: rgba(192, 57, 43, 0.13);
+  --color-warning-soft: rgba(176, 125, 18, 0.15);
+  --color-ok-soft: rgba(31, 122, 77, 0.14);
+  --color-info-soft: rgba(37, 99, 168, 0.13);
+  --color-restricted-soft: rgba(109, 40, 217, 0.12);
+  --color-nav: rgba(9, 56, 69, 0.68);
+  --color-nav-line: rgba(255, 255, 255, 0.16);
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+}
+html[data-appearance="glass"] body {
+  background:
+    radial-gradient(1100px 750px at 88% -12%, rgba(18, 165, 148, 0.3), transparent 62%),
+    radial-gradient(950px 700px at -8% 28%, rgba(118, 106, 255, 0.24), transparent 58%),
+    radial-gradient(900px 720px at 55% 115%, rgba(226, 84, 45, 0.18), transparent 60%),
+    #eaf2f4;
+  background-attachment: fixed;
+}
+html[data-appearance="glass"] .bg-card {
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 8px 32px rgba(14, 76, 92, 0.1);
+}
+html[data-appearance="glass"] aside {
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+html[data-appearance="glass"] .input {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* ==========================================================================
+ * Appearance: Notion — compact canvas, flat surfaces, low-saturation status
+ * markers.
+ * ========================================================================== */
+html[data-appearance="notion"] {
+  --color-ink: #37352f;
+  --color-muted: #9b9a97;
+  --color-line: #edece9;
+  --color-paper: #ffffff;
+  --color-card: #ffffff;
+  --color-teal-deep: #37352f;
+  --color-teal: #2383e2;
+  --color-teal-soft: #e7f3f8;
+  --color-accent: #d9730d;
+  --color-accent-soft: #faebdd;
+  --color-danger: #d44c47;
+  --color-danger-soft: #fdebec;
+  --color-warning: #cb912f;
+  --color-warning-soft: #fbf3db;
+  --color-caution: #d9730d;
+  --color-ok: #448361;
+  --color-ok-soft: #edf3ec;
+  --color-info: #337ea9;
+  --color-info-soft: #e7f3f8;
+  --color-restricted: #9065b0;
+  --color-restricted-soft: #f6f3f9;
+  --color-nav: #f7f7f5;
+  --color-nav-fg: #37352f;
+  --color-nav-muted: #73726e;
+  --color-nav-active: rgba(0, 0, 0, 0.055);
+  --color-nav-line: #e3e2de;
+  --color-nav-accent: #37352f;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --spacing: 0.225rem; /* compact canvas: every spacing utility shrinks ~10% */
+}
+html[data-appearance="notion"] aside {
+  border-right: 1px solid var(--color-nav-line);
+}
+html[data-appearance="notion"] .bg-card {
+  box-shadow: none !important;
+}
+html[data-appearance="notion"] body {
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+ * Appearance: Neo-Brutalism — multicolor print, hard edges, mechanical
+ * feedback.
+ * ========================================================================== */
+html[data-appearance="brutal"] {
+  --color-ink: #111111;
+  --color-muted: #44443e;
+  --color-line: #111111;
+  --color-paper: #faf1df;
+  --color-card: #ffffff;
+  --color-teal-deep: #111111;
+  --color-teal: #0046ff;
+  --color-teal-soft: #cfe0ff;
+  --color-accent: #ff2e88;
+  --color-accent-soft: #ffd3e8;
+  --color-danger: #e80028;
+  --color-danger-soft: #ffd2d9;
+  --color-warning: #a96a00;
+  --color-warning-soft: #ffe8a3;
+  --color-caution: #d14e00;
+  --color-ok: #008a45;
+  --color-ok-soft: #bff5d8;
+  --color-info: #0046ff;
+  --color-info-soft: #cfe0ff;
+  --color-restricted: #7b1fa2;
+  --color-restricted-soft: #e8cff7;
+  --color-nav: #ffd31d;
+  --color-nav-fg: #111111;
+  --color-nav-muted: rgba(0, 0, 0, 0.62);
+  --color-nav-active: rgba(0, 0, 0, 0.12);
+  --color-nav-line: rgba(0, 0, 0, 0.3);
+  --color-nav-accent: #111111;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+}
+html[data-appearance="brutal"] .rounded,
+html[data-appearance="brutal"] .rounded-full {
+  border-radius: 0;
+}
+html[data-appearance="brutal"] aside {
+  border-right: 3px solid #111111;
+}
+html[data-appearance="brutal"] header {
+  border-bottom-width: 2px;
+}
+html[data-appearance="brutal"] main .bg-card {
+  border: 2px solid #111111;
+  box-shadow: 5px 5px 0 #111111;
+}
+/* Nested surfaces inside a card should not stack heavy frames. */
+html[data-appearance="brutal"] main .bg-card .bg-card {
+  border-width: 1px;
+  box-shadow: none;
+}
+html[data-appearance="brutal"] .input {
+  border: 2px solid #111111;
+}
+html[data-appearance="brutal"] main :is(button, a):is(.bg-teal, .bg-danger, .bg-accent, .bg-info, .bg-ok, .bg-restricted, .bg-teal-deep) {
+  border: 2px solid #111111;
+  box-shadow: 3px 3px 0 #111111;
+  transition: transform 0.05s linear, box-shadow 0.05s linear;
+}
+html[data-appearance="brutal"] main :is(button, a):is(.bg-teal, .bg-danger, .bg-accent, .bg-info, .bg-ok, .bg-restricted, .bg-teal-deep):active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+html[data-appearance="brutal"] main :is(button, a).border {
+  border-width: 2px;
 }

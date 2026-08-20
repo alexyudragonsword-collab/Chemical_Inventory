@@ -45,7 +45,7 @@ export default async function SafetyHubPage() {
       <h1 className="text-xl font-semibold text-teal-deep">Safety</h1>
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
-          <Link key={card.href} href={card.href} className="rounded-lg border border-line bg-white p-4 hover:border-teal">
+          <Link key={card.href} href={card.href} className="rounded-lg border border-line bg-card p-4 hover:border-teal">
             <div className="text-sm font-semibold text-teal-deep">{card.title}</div>
             <div className="mt-1 text-xs text-muted">{card.detail}</div>
           </Link>

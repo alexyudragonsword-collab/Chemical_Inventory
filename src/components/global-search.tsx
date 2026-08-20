@@ -21,7 +21,7 @@ export function GlobalSearch() {
       <input
         name="q"
         placeholder="⌕  Search CAS, name, container ID"
-        className="w-full rounded-md border border-line bg-paper px-3 py-1.5 text-sm focus:border-teal focus:bg-white focus:ring-2 focus:ring-teal/20 focus:outline-none"
+        className="w-full rounded-md border border-line bg-paper px-3 py-1.5 text-sm focus:border-teal focus:bg-card focus:ring-2 focus:ring-teal/20 focus:outline-none"
       />
     </form>
   );

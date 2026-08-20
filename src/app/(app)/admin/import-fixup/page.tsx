@@ -55,7 +55,7 @@ export default async function ImportFixupPage() {
         Admin · {pendingCount} containers pending correction · {casCount} substances without CAS
       </p>
 
-      <section className="mt-5 rounded-lg border border-line bg-white">
+      <section className="mt-5 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
           Containers pending correction {pendingCount > 100 ? `(first 100 of ${pendingCount})` : ""}
         </h2>
@@ -166,7 +166,7 @@ export default async function ImportFixupPage() {
         </div>
       </section>
 
-      <section className="mt-5 rounded-lg border border-line bg-white">
+      <section className="mt-5 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">
           Substances without a CAS number {casCount > 100 ? `(first 100 of ${casCount})` : ""}
         </h2>

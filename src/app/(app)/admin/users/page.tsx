@@ -57,7 +57,7 @@ export default async function UsersPage() {
       </p>
 
       {/* Permission matrix */}
-      <section className="mt-5 overflow-x-auto rounded-lg border border-line bg-white p-4">
+      <section className="mt-5 overflow-x-auto rounded-lg border border-line bg-card p-4">
         <h2 className="text-sm font-semibold text-teal-deep">
           Permission matrix{" "}
           <span className="ml-2 text-xs font-normal text-muted">
@@ -115,7 +115,7 @@ export default async function UsersPage() {
       </section>
 
       {/* Create user */}
-      <details className="mt-5 rounded-lg border border-line bg-white">
+      <details className="mt-5 rounded-lg border border-line bg-card">
         <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-teal-deep">
           + New user
         </summary>
@@ -159,7 +159,7 @@ export default async function UsersPage() {
       </details>
 
       {/* User list */}
-      <div className="mt-5 overflow-x-auto rounded-lg border border-line bg-white">
+      <div className="mt-5 overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">

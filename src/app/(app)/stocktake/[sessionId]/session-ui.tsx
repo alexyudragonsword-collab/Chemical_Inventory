@@ -21,7 +21,7 @@ export function ScanForm({ sessionId }: { sessionId: string }) {
 
   return (
     <form
-      className="mt-4 flex flex-wrap items-end gap-2 rounded-lg border border-line bg-white p-4"
+      className="mt-4 flex flex-wrap items-end gap-2 rounded-lg border border-line bg-card p-4"
       onSubmit={(e) => {
         e.preventDefault();
         const code = codeRef.current?.value.trim();
