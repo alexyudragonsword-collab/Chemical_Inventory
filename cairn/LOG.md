@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Sign in 页新增自助注册（/sign-up）
+
+- 新增 `/sign-up` 注册页（(auth) 组，风格与 sign-in 一致），Sign in 页底部加 "Create an account" 入口。
+- 安全模型：自助注册一律落 **VIEWER（只读）** 且立即可登录浏览；提权与实验室指派由 Admin 在 Admin → Users 完成——注册开放但不放开任何写权限。注册写入审计事件 `user.register`（actor=新用户本人）。
+- 校验：姓名≥2、邮箱格式+小写归一+唯一性（重复给友好提示）、密码≥8、两次一致；成功后自动登录跳 dashboard。
+- 验证：Playwright 全流程（注册→自动登录→dashboard 显示 Viewer；重复邮箱拒绝；密码不一致拒绝且不落库）；typecheck+build+56 测试通过。
+
 ## 2026-08-21 · 无演示数据模式（--no-demo）+ Windows 包 v3
 
 - 用户指出 B2-14/A1-07/C3-02/D1-11 不在原始 xlsx 中——确认为演示种子，选择清除。核实：真实数据 = xlsx 表头 CREATE HUJ/BGU 实验室（R02-08/I02-11/E04-12/I03-09，479 容器）；导入自建 "Legacy import" 站点，不依赖种子实验室。

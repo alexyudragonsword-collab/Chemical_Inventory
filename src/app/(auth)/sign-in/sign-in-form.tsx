@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { signInAction, type SignInState } from "./actions";
 
@@ -77,6 +78,13 @@ export function SignInForm({ labs }: { labs: { id: string; code: string; name: s
       >
         {pending ? "Signing in…" : "Sign in"}
       </button>
+
+      <p className="mt-4 text-center text-sm text-muted">
+        New here?{" "}
+        <Link href="/sign-up" className="font-medium text-teal hover:underline">
+          Create an account
+        </Link>
+      </p>
 
       <p className="mt-4 text-center text-xs text-muted">
         Session expires after 12 h · SSO and 2FA for controlled substances arrive in a later
