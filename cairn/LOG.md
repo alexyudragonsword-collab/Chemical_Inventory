@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Windows 离线包 v2 重打包并交付
+
+- 应用户要求重打 Windows 包，纳入 M9 之后的全部修复：三套外观、dispose 流程（登记册+状态显示+transfer 守卫）、Adjust 对话框简化、Import fixup 越权崩溃修复与错误边界。
+- 构建门全绿：479 容器导入、审计链 510 事件校验、恢复彩排（507 容器/9 用户）、服务与 worker 冒烟。85MB zip（sha256 前缀 76bd548e）仍按附件上限拆 3 卷 + join-package.bat 交付。
+- 构建命令与流水线不变（`pnpm package:win -- --xlsx …`，缓存的 Node/zonky 运行时直接复用）。
+
 ## 2026-08-21 · Import fixup "Set" 崩溃修复（server-side exception）
 
 - 用户报错：Fix 列指派 custodian 点 Set 弹 "Application error: a server-side exception…Digest"。复现根因：resolve_import_fixup 对 Lab Manager 是 OWN（仅限所管实验室），但工作清单页展示全部实验室的待修行；点到别人实验室的行时 action 抛裸 Error → 生产环境白屏。
