@@ -52,7 +52,9 @@ export function buildInventoryWhere(
         ? { expiryDate: { lt: now } }
         : {};
   return {
-    status: { notIn: ["DISPOSED"] },
+    // Disposed containers are hidden from working views but stay on record;
+    // the explicit "Disposed" filter is the registry of everything disposed.
+    status: params.status === "disposed" ? "DISPOSED" : { notIn: ["DISPOSED"] },
     AND: [
       scopeMine ? custodyWhere(user) : {},
       params.q ? containerSearchWhere(params.q) : {},

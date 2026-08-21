@@ -2,6 +2,14 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Dispose 流程修复：已处置登记册 + 状态显示
+
+- 用户反馈两问题：① 没有集中查看所有 disposed 容器的地方；② check-out 确认 dispose 后页面仍显示 "My custody"。
+- 修复：Inventory 新增 "Disposed" 筛选片作为登记册视图（默认视图隐藏已处置，选中后只列 DISPOSED，行内显示处置日期与原因，来自 DISPOSE 交易记录）；check-out 面板改为操作成功后 `router.refresh()`，非可操作状态显示状态徽标（替代 custody 徽标）并用说明文案屏蔽 deduct/transfer/dispose 表单。
+- 自查补洞：`transferCustody` 原缺状态守卫，现拒绝非 ACTIVE/EMPTY 容器（域层冒烟已验证 "Cannot transfer a disposed container"）；disposed 行不再误标 low stock。
+- 验证：typecheck + 56 测试通过；Playwright 截图目检两页。改动：`src/server/queries.ts`、`src/server/inventory.ts`、`src/app/(app)/inventory/page.tsx`、`src/app/(app)/check-out/panel.tsx`。
+- 注意：Windows 离线包早于本修复，需要时重跑 `pnpm package:win` 重新打包。
+
 ## 2026-08-20 · M9 三套可切换外观（纯视觉，不动数据）
 
 - 新增外观系统：默认 ChemTrack 之外提供 流光玻璃（环境色渐变+毛玻璃+柔和层级）、Notion（浅灰侧栏+纯平表面+低饱和状态色+紧凑间距）、Neo-Brutalism（黄色侧栏+方角硬边框+偏移硬阴影+机械按压反馈）。

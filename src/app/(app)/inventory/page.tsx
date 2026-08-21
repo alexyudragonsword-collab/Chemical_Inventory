@@ -44,6 +44,13 @@ export default async function InventoryPage({
         lab: { select: { code: true } },
         location: { select: { code: true, name: true } },
         custodian: { select: { name: true } },
+        // Disposal record for the "Disposed" registry view (empty otherwise).
+        transactions: {
+          where: { kind: "DISPOSE" },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { createdAt: true, reason: true },
+        },
       },
       orderBy: [{ substance: { name: "asc" } }, { code: "asc" }],
       take: 500,
@@ -62,6 +69,7 @@ export default async function InventoryPage({
         isControlled: c.substance.isControlled,
       }),
       belowMin:
+        c.status === "ACTIVE" &&
         c.substance.minStockLevel !== null &&
         c.substance.minStockUnit === c.unit &&
         c.currentQuantity.toNumber() < c.substance.minStockLevel.toNumber(),
@@ -125,6 +133,7 @@ export default async function InventoryPage({
         {chip("In date", qs({ status: undefined }), !params.status)}
         {chip("Expiring ≤30 d", qs({ status: "expiring" }), params.status === "expiring")}
         {chip("Expired", qs({ status: "expired" }), params.status === "expired")}
+        {chip("Disposed", qs({ status: params.status === "disposed" ? undefined : "disposed" }), params.status === "disposed")}
         {chip("Low stock only", qs({ low: params.low ? undefined : "1" }), Boolean(params.low))}
         {!scopeMine && (
           <>
@@ -207,6 +216,12 @@ export default async function InventoryPage({
                   <ExpiryPill expiryDate={c.expiryDate} />
                 </td>
                 <td className="px-4 py-2">
+                  {c.status === "DISPOSED" ? (
+                    <span className="text-xs text-muted">
+                      Disposed {c.transactions[0]?.createdAt.toLocaleDateString("en-GB") ?? ""}
+                      {c.transactions[0]?.reason ? ` — ${c.transactions[0].reason}` : ""}
+                    </span>
+                  ) : (
                   <div className="flex items-center gap-2">
                     <RowAdjust
                       target={{
@@ -229,6 +244,7 @@ export default async function InventoryPage({
                     />
                     {mode === "request-only" && <RequestTransferButton containerId={c.id} compact />}
                   </div>
+                  )}
                 </td>
               </tr>
             ))}

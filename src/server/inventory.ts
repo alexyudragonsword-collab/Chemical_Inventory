@@ -209,6 +209,9 @@ export async function transferCustody(opts: {
     const container = await loadContainerForUpdate(tx, containerId);
     const mode = authorizeContainer(user, "transfer", toAuthz(container));
     if (mode !== "editable") throw new AuthzError(mode, "transfer");
+    if (container.status !== "ACTIVE" && container.status !== "EMPTY") {
+      throw new DomainError(`Cannot transfer a ${container.status.toLowerCase()} container`);
+    }
 
     const toUser = await tx.user.findUnique({ where: { id: toUserId } });
     if (!toUser || !toUser.isActive) throw new DomainError("Receiving user not found or inactive");

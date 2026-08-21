@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { formatQty, presetSteps, unitLabel } from "@/lib/units-ui";
 import { CustodyPill, ExpiryPill, HazardPill, Pill } from "@/components/pills";
@@ -54,6 +55,7 @@ export function CheckOutPanel({
   projects: { code: string; name: string }[];
   people: { id: string; name: string }[];
 }) {
+  const router = useRouter();
   const [tab, setTab] = useState<"deduct" | "transfer" | "dispose">("deduct");
   const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<CheckOutResult | null>(null);
@@ -91,6 +93,7 @@ export function CheckOutPanel({
     startTransition(async () => {
       const r = await action();
       setResult(r);
+      if (r.ok) router.refresh(); // re-render the scanned context with real state
       if (!r.ok && r.needWitness) setNeedWitness(true);
     });
   }
@@ -102,7 +105,13 @@ export function CheckOutPanel({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-lg font-semibold">{container.code}</span>
-            {container.custodianName && mode === "editable" ? <CustodyPill /> : null}
+            {container.status === "ACTIVE" || container.status === "EMPTY" ? (
+              container.custodianName && mode === "editable" ? <CustodyPill /> : null
+            ) : (
+              <Pill tone={container.status === "DISPOSED" ? "neutral" : "danger"}>
+                {container.status.charAt(0) + container.status.slice(1).toLowerCase()}
+              </Pill>
+            )}
             <HazardPill storageClass={container.storageClass} />
             {container.isControlled && <Pill tone="restricted">Controlled</Pill>}
             {container.useFirst && <Pill tone="info">Use first</Pill>}
@@ -146,6 +155,14 @@ export function CheckOutPanel({
         </div>
       ) : null}
 
+      {container.status !== "ACTIVE" && container.status !== "EMPTY" ? (
+        <div className="p-4 text-sm text-muted">
+          {container.status === "DISPOSED"
+            ? "This container has been disposed of. It stays on record for compliance — see Inventory → Disposed, or the audit trail for the full history."
+            : `This container is marked ${container.status.toLowerCase()} — resolve it via stocktake or the audit trail before further movements.`}
+        </div>
+      ) : (
+      <>
       {mode !== "editable" && tab === "deduct" ? (
         <div className="p-4 text-sm text-muted">
           {mode === "restricted"
@@ -357,6 +374,8 @@ export function CheckOutPanel({
           </>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
