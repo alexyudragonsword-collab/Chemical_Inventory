@@ -11,13 +11,11 @@ export function RowAdjust({
   target,
   mode,
   custodianName,
-  projects,
   disabledReason,
 }: {
   target: AdjustTarget;
   mode: "editable" | "request-only" | "read-only" | "restricted" | "denied";
   custodianName: string | null;
-  projects: { code: string; name: string }[];
   disabledReason?: string;
 }) {
   const [open, setOpen] = useState<"DEDUCT" | "ADD" | null>(null);
@@ -59,12 +57,7 @@ export function RowAdjust({
         </button>
       </div>
       {open && (
-        <AdjustDialog
-          target={target}
-          projects={projects}
-          initialMode={open}
-          onClose={() => setOpen(null)}
-        />
+        <AdjustDialog target={target} initialMode={open} onClose={() => setOpen(null)} />
       )}
     </>
   );

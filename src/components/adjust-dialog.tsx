@@ -2,8 +2,8 @@
 
 // One dialog for the three quantity flows: Deduct, Add, Correct count.
 // Shows the resulting number before confirm (deck: "the before → after strip
-// removes the mental arithmetic"), demands a purpose, and reveals the witness
-// fields only when the server says one is required.
+// removes the mental arithmetic") and reveals the witness fields only when
+// the server says one is required.
 
 import { useMemo, useState, useTransition } from "react";
 import { adjustQuantityAction, reverseTransactionAction, type AdjustResult } from "@/app/(app)/inventory/actions";
@@ -25,19 +25,15 @@ type Mode = "DEDUCT" | "ADD" | "CORRECT";
 
 export function AdjustDialog({
   target,
-  projects,
   initialMode,
   onClose,
 }: {
   target: AdjustTarget;
-  projects: { code: string; name: string }[];
   initialMode: Mode;
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [amount, setAmount] = useState<number>(presetSteps(target.unit)[2] ?? 1);
-  const [reason, setReason] = useState("");
-  const [projectCode, setProjectCode] = useState("");
   const [needWitness, setNeedWitness] = useState(target.isControlled);
   const [witnessEmail, setWitnessEmail] = useState("");
   const [witnessPassword, setWitnessPassword] = useState("");
@@ -71,8 +67,6 @@ export function AdjustDialog({
         containerId: target.containerId,
         mode,
         amount,
-        reason,
-        projectCode: projectCode || undefined,
         witnessEmail: witnessEmail || undefined,
         witnessPassword: witnessPassword || undefined,
       });
@@ -237,34 +231,6 @@ export function AdjustDialog({
               </span>
             </div>
 
-            {/* Purpose */}
-            <label className="mt-4 block text-xs font-semibold tracking-wide text-muted uppercase">
-              Purpose (required)
-              <input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={mode === "CORRECT" ? "e.g. Stocktake recount" : "e.g. Reaction solvent"}
-                className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
-              />
-            </label>
-            {projects.length > 0 && (
-              <label className="mt-3 block text-xs font-semibold tracking-wide text-muted uppercase">
-                Project / cost centre
-                <select
-                  value={projectCode}
-                  onChange={(e) => setProjectCode(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-line bg-card px-3 py-2 text-sm normal-case focus:border-teal focus:outline-none"
-                >
-                  <option value="">—</option>
-                  {projects.map((p) => (
-                    <option key={p.code} value={p.code}>
-                      {p.code} · {p.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-
             {/* Witness — controlled substances always; corrections when server demands */}
             {(needWitness || (mode === "CORRECT" && correctionDelta > 0.2)) && (
               <fieldset className="mt-4 rounded-md border border-restricted/30 bg-restricted-soft p-3">
@@ -306,7 +272,7 @@ export function AdjustDialog({
               </button>
               <button
                 onClick={submit}
-                disabled={pending || invalid || !reason.trim() || Number.isNaN(amount)}
+                disabled={pending || invalid || Number.isNaN(amount)}
                 className={`rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${
                   mode === "DEDUCT" ? "bg-teal hover:bg-teal-deep" : mode === "ADD" ? "bg-teal hover:bg-teal-deep" : "bg-accent hover:opacity-90"
                 }`}

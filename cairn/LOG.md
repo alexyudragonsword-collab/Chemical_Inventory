@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Adjust quantity 对话框去掉 Purpose 与 Project 字段
+
+- 用户要求：Adjust quantity 不再填 Purpose 和 Project/cost centre。对话框现只剩 数量 + 前后对比条 + 确认；witness 机制（管制品/大于20%更正）不变。
+- 审计链仍要求非空 reason：server action 层按模式写默认值（Quantity deducted / Quantity added / Count correction）；schema 中 reason/projectCode 改 optional（check-out 流程有独立表单，未改动）。
+- 连带清理：RowAdjust 及两处调用页不再传/查 projects。验证：typecheck+build+56 测试通过；Playwright 实际走一次 deduct→recorded→reverse 闭环。
+- 改动：`src/components/adjust-dialog.tsx`、`row-adjust.tsx`、`src/app/(app)/inventory/{page,actions}.tsx|ts`、`chemicals/[substanceId]/page.tsx`。
+
 ## 2026-08-21 · Dispose 流程修复：已处置登记册 + 状态显示
 
 - 用户反馈两问题：① 没有集中查看所有 disposed 容器的地方；② check-out 确认 dispose 后页面仍显示 "My custody"。

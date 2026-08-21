@@ -16,11 +16,19 @@ const adjustSchema = z.object({
   containerId: z.string().min(1),
   mode: z.enum(["DEDUCT", "ADD", "CORRECT"]),
   amount: z.coerce.number().nonnegative(),
-  reason: z.string().trim().min(1, "Purpose is required"),
+  reason: z.string().trim().optional(),
   projectCode: z.string().trim().optional(),
   witnessEmail: z.string().trim().optional(),
   witnessPassword: z.string().optional(),
 });
+
+// The audit trail requires a non-empty reason on every transaction; the
+// dialog no longer asks for one, so record the action itself.
+const DEFAULT_REASONS = {
+  DEDUCT: "Quantity deducted",
+  ADD: "Quantity added",
+  CORRECT: "Count correction",
+} as const;
 
 export type AdjustResult =
   | { ok: true; before: number; after: number; transactionId: string }
@@ -44,7 +52,7 @@ export async function adjustQuantityAction(input: unknown): Promise<AdjustResult
       containerId: data.containerId,
       mode: data.mode,
       amount: data.amount,
-      reason: data.reason,
+      reason: data.reason || DEFAULT_REASONS[data.mode],
       projectCode: data.projectCode || undefined,
       witnessId,
     });

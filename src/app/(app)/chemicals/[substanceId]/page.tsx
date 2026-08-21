@@ -56,11 +56,6 @@ export default async function ChemicalDetailPage({
       })
     : [];
 
-  const projects = await prisma.project.findMany({
-    where: { isActive: true },
-    select: { code: true, name: true },
-  });
-
   // Consumption over the last 6 months, my custody only (a reorder signal).
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
@@ -289,7 +284,6 @@ export default async function ChemicalDetailPage({
                           }}
                           mode={mode}
                           custodianName={c.custodian?.name ?? null}
-                          projects={projects}
                         />
                         {mode === "request-only" && (
                           <RequestTransferButton containerId={c.id} compact />

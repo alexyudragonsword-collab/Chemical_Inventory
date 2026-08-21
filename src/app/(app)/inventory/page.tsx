@@ -36,7 +36,7 @@ export default async function InventoryPage({
 
   const where: Prisma.ContainerWhereInput = buildInventoryWhere(user, params);
 
-  const [containers, projects, labs] = await Promise.all([
+  const [containers, labs] = await Promise.all([
     prisma.container.findMany({
       where,
       include: {
@@ -55,7 +55,6 @@ export default async function InventoryPage({
       orderBy: [{ substance: { name: "asc" } }, { code: "asc" }],
       take: 500,
     }),
-    prisma.project.findMany({ where: { isActive: true }, select: { code: true, name: true } }),
     prisma.lab.findMany({ select: { code: true }, orderBy: { code: "asc" } }),
   ]);
 
@@ -240,7 +239,6 @@ export default async function InventoryPage({
                       }}
                       mode={mode}
                       custodianName={c.custodian?.name ?? null}
-                      projects={projects}
                     />
                     {mode === "request-only" && <RequestTransferButton containerId={c.id} compact />}
                   </div>
