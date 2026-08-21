@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Import fixup "Set" 崩溃修复（server-side exception）
+
+- 用户报错：Fix 列指派 custodian 点 Set 弹 "Application error: a server-side exception…Digest"。复现根因：resolve_import_fixup 对 Lab Manager 是 OWN（仅限所管实验室），但工作清单页展示全部实验室的待修行；点到别人实验室的行时 action 抛裸 Error → 生产环境白屏。
+- 修复三层：① 工作清单按权限过滤——OWN 角色只看/只数自己管的实验室，Admin/EHS 仍看全部；② action 越权时改为 redirect 回页面带 `?error=scope` 显示黄条提示，不再抛异常；③ 新增 `src/app/(app)/error.tsx` 错误边界，今后任何未捕获服务端错误显示应用内友好卡片（含 digest 参考号 + Try again），不再是吓人的裸错误页。
+- 验证：Playwright 双账号走查——li.wei 只见 B2-14 行且 Set 成功；admin 仍见 479 行全量；typecheck+build+56 测试通过。
+- 提示用户：Windows 包早于此修复，需重打包。
+
 ## 2026-08-21 · Adjust quantity 对话框去掉 Purpose 与 Project 字段
 
 - 用户要求：Adjust quantity 不再填 Purpose 和 Project/cost centre。对话框现只剩 数量 + 前后对比条 + 确认；witness 机制（管制品/大于20%更正）不变。

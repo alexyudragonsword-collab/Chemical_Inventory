@@ -4,7 +4,8 @@
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { can } from "@/server/authz";
+import { can, GLOBAL_MATRIX } from "@/server/authz";
+import { managedLabIds } from "@/server/queries";
 import { requireUser } from "@/server/session";
 import { Pill } from "@/components/pills";
 import {
@@ -16,15 +17,27 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function ImportFixupPage() {
+export default async function ImportFixupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const user = await requireUser();
   if (!can(user, "resolve_import_fixup")) {
     return <p className="text-sm text-muted">You do not have access to the import fixup worklist.</p>;
   }
+  const { error } = await searchParams;
+
+  // OWN-scoped roles (lab managers) only see — and can only fix — their own
+  // labs' containers; ALLOW-scoped roles (EHS, Admin) see the whole worklist.
+  const labScope: Prisma.ContainerWhereInput =
+    GLOBAL_MATRIX.resolve_import_fixup[user.role] === "ALLOW"
+      ? {}
+      : { labId: { in: managedLabIds(user) } };
 
   const [pendingContainers, pendingSubstances, users, pendingCount, casCount] = await Promise.all([
     prisma.container.findMany({
-      where: { pendingCorrection: { not: Prisma.DbNull } },
+      where: { pendingCorrection: { not: Prisma.DbNull }, ...labScope },
       include: {
         substance: { select: { name: true } },
         lab: { select: { id: true, code: true, name: true, locations: { select: { id: true, code: true }, orderBy: { code: "asc" } } } },
@@ -44,7 +57,7 @@ export default async function ImportFixupPage() {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    prisma.container.count({ where: { pendingCorrection: { not: Prisma.DbNull } } }),
+    prisma.container.count({ where: { pendingCorrection: { not: Prisma.DbNull }, ...labScope } }),
     prisma.substance.count({ where: { needsCasEnrichment: true } }),
   ]);
 
@@ -54,6 +67,13 @@ export default async function ImportFixupPage() {
       <p className="text-sm text-muted">
         Admin · {pendingCount} containers pending correction · {casCount} substances without CAS
       </p>
+
+      {error === "scope" && (
+        <div className="mt-3 rounded-md border border-warning/40 bg-warning-soft px-4 py-2 text-sm text-warning">
+          That container sits in a lab you don&apos;t manage, so the correction was not applied.
+          Ask an Admin or EHS Officer, or the lab&apos;s own manager, to resolve it.
+        </div>
+      )}
 
       <section className="mt-5 rounded-lg border border-line bg-card">
         <h2 className="border-b border-line px-4 py-3 text-sm font-semibold text-teal-deep">

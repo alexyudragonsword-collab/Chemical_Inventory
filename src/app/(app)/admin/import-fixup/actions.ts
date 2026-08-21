@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { writeAuditEvent } from "@/server/audit";
@@ -11,7 +12,9 @@ import { requireUser } from "@/server/session";
 async function requireFixupAccess(labId?: string) {
   const user = await requireUser();
   if (!can(user, "resolve_import_fixup", labId)) {
-    throw new Error("Not authorized to resolve import corrections");
+    // Out-of-scope lab (e.g. a stale worklist page): bounce back with a
+    // banner instead of surfacing a server exception.
+    redirect("/admin/import-fixup?error=scope");
   }
   return user;
 }
