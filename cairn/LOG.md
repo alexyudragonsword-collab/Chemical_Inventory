@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · 无演示数据模式（--no-demo）+ Windows 包 v3
+
+- 用户指出 B2-14/A1-07/C3-02/D1-11 不在原始 xlsx 中——确认为演示种子，选择清除。核实：真实数据 = xlsx 表头 CREATE HUJ/BGU 实验室（R02-08/I02-11/E04-12/I03-09，479 容器）；导入自建 "Legacy import" 站点，不依赖种子实验室。
+- 实现：`prisma/seed.ts` 支持 `--no-demo`（或 SEED_DEMO=0）——只建参照数据（H/P 语句、相容性矩阵、权限类别，导入按 code 查权限类别所以必须保留）+ 6 个文档化账号（无实验室成员关系）；跳过演示站点/实验室/位置/物质/容器/项目/SDS。`build-package.sh` 加 `--no-demo` 透传（经 SEED_DEMO env，避开 pnpm `--` 透传坑）。
+- 验证（scratch 库）：no-demo seed + 真实导入后=仅 4 真实实验室 479 容器、6 账号、208 物质全部来自 xlsx、审计链 479 事件 OK。
+- 运维要点：无成员关系时除 Admin/EHS 外无人能操作容器——装好后先在 Admin → Users 给真实实验室指派管理员/成员；Import fixup 指派保管人时会自动创建成员关系。
+
 ## 2026-08-21 · Windows 离线包 v2 重打包并交付
 
 - 应用户要求重打 Windows 包，纳入 M9 之后的全部修复：三套外观、dispose 流程（登记册+状态显示+transfer 守卫）、Adjust 对话框简化、Import fixup 越权崩溃修复与错误边界。

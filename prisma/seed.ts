@@ -1,5 +1,10 @@
 // Development / demo seed. Assumes a fresh database (guarded: no-op when data
 // exists). All demo accounts share the password "chemtrack-demo".
+//
+// --no-demo (or SEED_DEMO=0): reference data + login accounts only — no demo
+// sites, labs, locations, substances, or containers. For deployments whose
+// inventory comes entirely from the legacy import; lab memberships are then
+// assigned in Admin → Users or created automatically by Import fixup.
 
 import { CanonicalUnit, GhsPictogram, PrismaClient, Prisma, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -8,6 +13,7 @@ import { writeAuditEvent } from "../src/server/audit";
 const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = "chemtrack-demo";
+const NO_DEMO = process.argv.includes("--no-demo") || process.env.SEED_DEMO === "0";
 
 // Storage classes used by the compatibility matrix.
 const SC = {
@@ -153,6 +159,28 @@ async function main() {
     const p = await prisma.permitCategory.create({ data: { code, name } });
     permits[code] = p.id;
   }
+  if (NO_DEMO) {
+    // Accounts only — the documented logins, with no lab memberships yet.
+    // Memberships come from Admin → Users or from Import fixup assignments.
+    for (const [email, name, role] of [
+      ["admin@lab.internal", "A. Admin", "ADMIN"],
+      ["li.wei@lab.internal", "Li Wei", "LAB_MANAGER"],
+      ["m.tan@lab.internal", "M. Tan", "CUSTODIAN"],
+      ["r.iyer@lab.internal", "R. Iyer", "LAB_USER"],
+      ["ehs@lab.internal", "K. Osei", "EHS_OFFICER"],
+      ["viewer@lab.internal", "V. Ng", "VIEWER"],
+    ] as [string, string, Role][]) {
+      await prisma.user.create({ data: { email, name, role, passwordHash } });
+    }
+    console.log("Seed complete (--no-demo: reference data + accounts only).");
+    console.log(`Accounts (password: ${DEMO_PASSWORD}):`);
+    console.log("  admin@lab.internal (Admin), li.wei@lab.internal (Lab Manager),");
+    console.log("  m.tan@lab.internal (Custodian), r.iyer@lab.internal (Lab User),");
+    console.log("  ehs@lab.internal (EHS Officer), viewer@lab.internal (Viewer)");
+    console.log("Assign lab memberships in Admin → Users after the legacy import.");
+    return;
+  }
+
   for (const [code, name] of [
     ["44-B", "Suzuki coupling"],
     ["12-A", "Perovskite films"],

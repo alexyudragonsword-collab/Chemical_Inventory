@@ -41,11 +41,13 @@ WIN="$REPO/deploy/windows"
 CACHE="$WIN/cache"
 STAGE="$WIN/stage"
 XLSX="${XLSX:-}"
+NO_DEMO=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --) shift ;; # pnpm passes the separator through
     --xlsx) XLSX="$2"; shift 2 ;;
+    --no-demo) NO_DEMO=1; shift ;; # snapshot without demo labs/inventory
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -149,7 +151,7 @@ trap cleanup_tmpdb EXIT
 
 SNAP_URL="postgresql://$SNAP_OWNER_USER:$SNAP_OWNER_PASSWORD@$SNAP_PG_HOST:$SNAP_PG_PORT/$TMPDB"
 DATABASE_URL="$SNAP_URL" pnpm db:migrate >/dev/null
-DATABASE_URL="$SNAP_URL" pnpm db:seed >/dev/null
+DATABASE_URL="$SNAP_URL" SEED_DEMO="$([[ "$NO_DEMO" == 1 ]] && echo 0 || echo 1)" pnpm db:seed >/dev/null
 if [[ -n "$XLSX" ]]; then
   DATABASE_URL="$SNAP_URL" pnpm import:legacy -- --file "$XLSX" | tail -3
 fi
@@ -259,7 +261,7 @@ Built: $(date -u +%Y-%m-%dT%H:%M:%SZ) from commit $GIT_SHA
 Node: v$NODE_VERSION (win-x64)
 PostgreSQL: $PG_VERSION (zonky embedded binaries)
 Prisma: $(node -p "require('$REPO/node_modules/@prisma/client/package.json').version")
-Snapshot: seed data$( [[ -n "$XLSX" ]] && echo " + legacy import ($(basename "$XLSX"))" )
+Snapshot: $( [[ "$NO_DEMO" == 1 ]] && echo "reference data + accounts (no demo inventory)" || echo "seed data" )$( [[ -n "$XLSX" ]] && echo " + legacy import ($(basename "$XLSX"))" )
 EOF
 unix2dos_file "$DEST/VERSION.txt"
 
