@@ -8,6 +8,7 @@
 // the server says one is required.
 
 import { useMemo, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { adjustQuantityAction, reverseTransactionAction, type AdjustResult } from "@/app/(app)/inventory/actions";
 import { formatQty, presetSteps, unitLabel } from "@/lib/units-ui";
 
@@ -88,7 +89,10 @@ export function AdjustDialog({
     });
   }
 
-  return (
+  // Portal to <body>: the glass appearance puts a backdrop-filter on .bg-card
+  // ancestors, which turns them into containing blocks for position:fixed —
+  // rendered in place, the overlay would center on the card, not the viewport.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" onClick={onClose}>
       <div
         className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl"
@@ -287,6 +291,7 @@ export function AdjustDialog({
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

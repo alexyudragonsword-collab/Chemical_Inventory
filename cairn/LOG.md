@@ -2,6 +2,13 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · Glass 主题 Adjust 弹窗错位修复（backdrop-filter 陷阱）
+
+- 用户反馈：Liquid Glass 主题下点 Adjust 弹窗不在视口中心，要往下滚动才能看到（其余三主题正常）。
+- 根因：glass 给 `.bg-card` 加 `backdrop-filter`，按 CSS 规范该属性使祖先成为 `position:fixed` 的包含块——弹窗在卡片内渲染时就相对卡片而非视口定位。
+- 修复：AdjustDialog 改用 `createPortal(…, document.body)` 渲染，脱离任何 filter 上下文；全站唯一 `fixed inset-0` 浮层就是它，无其他受害者。
+- 验证：四主题 × 弹窗 boundingBox 全部落在视口内（y≈303/900，scrollY=0）；typecheck+build+56 测试通过。教训：主题层引入 filter/backdrop-filter/transform 时，所有 fixed 浮层必须走 portal。
+
 ## 2026-08-22 · Transfers：Admin 收件箱兜底无人认领请求
 
 - 背景：转移审批人 = 容器保管人 或 所属实验室 manager；导入初期两者都可能缺失，请求会落到"谁都看不见"的死角。
