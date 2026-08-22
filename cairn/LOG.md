@@ -2,6 +2,11 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · Windows 包 v4 交付（含近三批 UI 改动）
+
+- 重打包（--no-demo + 真实 xlsx）：纳入 自助注册页、Adjust 去 Add、Adjust/Check-out 去 Purpose+Project 全部改动。
+- 验证门全绿：恢复彩排 479 容器/6 账号、审计链 479 事件、服务与 worker 冒烟。85MB zip（sha256 前缀 eb1642c1）拆 3 卷交付，合并脚本/说明校验值同步更新。
+
 ## 2026-08-21 · Check-out 三操作去掉 Purpose/Reason 与 Project 字段
 
 - Deduct/Transfer/Dispose 三个表单不再要求 Purpose/Reason，Project/cost centre 下拉一并移除；保留 Dispensed into/Fume hood/检查清单（deduct）、收件人（transfer）、Waste stream（dispose，选填）。
