@@ -17,6 +17,7 @@ export default async function DashboardPage() {
   const now = new Date();
   const soon = new Date(Date.now() + 30 * 86_400_000);
   const weekAgo = new Date(Date.now() - 7 * 86_400_000);
+  const monthAgo = new Date(Date.now() - 30 * 86_400_000);
 
   const [
     workspaceLab,
@@ -24,7 +25,8 @@ export default async function DashboardPage() {
     addedThisWeek,
     expiringSoon,
     expired,
-    belowMinContainers,
+    disposedCount,
+    disposedRecent,
     openRequests,
     recent,
   ] = await Promise.all([
@@ -48,9 +50,9 @@ export default async function DashboardPage() {
       include: { substance: { select: { name: true } } },
       orderBy: { expiryDate: "asc" },
     }),
-    prisma.container.findMany({
-      where: { ...activeCustody(custody), substance: { minStockLevel: { not: null } } },
-      include: { substance: { select: { name: true, minStockLevel: true, minStockUnit: true } } },
+    prisma.container.count({ where: { AND: [custody, { status: "DISPOSED" }] } }),
+    prisma.inventoryTransaction.count({
+      where: { kind: "DISPOSE", createdAt: { gte: monthAgo }, container: custody },
     }),
     prisma.transferRequest.findMany({
       where: { currentCustodianId: user.id, status: "PENDING" },
@@ -68,13 +70,6 @@ export default async function DashboardPage() {
       take: 8,
     }),
   ]);
-
-  const belowMin = belowMinContainers.filter(
-    (c) =>
-      c.substance.minStockLevel !== null &&
-      c.substance.minStockUnit === c.unit &&
-      c.currentQuantity.toNumber() < c.substance.minStockLevel.toNumber(),
-  );
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -100,11 +95,11 @@ export default async function DashboardPage() {
           href="/inventory?status=expiring"
         />
         <Kpi
-          label="Below min level"
-          value={belowMin.length}
-          note={belowMin.length > 0 ? "Reorder suggested" : "All within limits"}
-          tone={belowMin.length > 0 ? "warning" : "ok"}
-          href="/inventory?low=1"
+          label="Disposed items"
+          value={disposedCount}
+          note={disposedRecent > 0 ? `${disposedRecent} in the last 30 days` : "none in the last 30 days"}
+          tone="neutral"
+          href="/inventory?status=disposed"
         />
         <Kpi
           label="Open requests"
@@ -140,18 +135,6 @@ export default async function DashboardPage() {
                 tone="warning"
               />
             ))}
-            {belowMin.slice(0, 3).map((c) => (
-              <ActionRow
-                key={c.id}
-                title={c.substance.name}
-                detail={`Below min (${formatQuantity(c.currentQuantity.toNumber(), c.unit)} / ${formatQuantity(
-                  c.substance.minStockLevel!.toNumber(),
-                  c.unit,
-                )})`}
-                href="/inventory?low=1"
-                tone="warning"
-              />
-            ))}
             {openRequests.map((r) => (
               <ActionRow
                 key={r.id}
@@ -161,7 +144,7 @@ export default async function DashboardPage() {
                 tone="info"
               />
             ))}
-            {expired.length + expiringSoon.length + belowMin.length + openRequests.length === 0 && (
+            {expired.length + expiringSoon.length + openRequests.length === 0 && (
               <li className="px-4 py-8 text-center text-sm text-muted">
                 Nothing needs you right now.
               </li>

@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · Dashboard KPI：Below min level → Disposed items
+
+- 用户判断 below-min 指标无意义（容器只消耗到空不补充，min-stock 补货逻辑不适用）。KPI 第三块改为 Disposed items：保管范围内已处置容器总数 + 近 30 天处置数（DISPOSE 交易计数），点击直达 Inventory → Disposed 登记册。
+- "Needs your action" 中的 below-min 行一并移除；Inventory 页的 "Low stock only" 筛选片暂保留未动。
+- 验证：Playwright 目检 KPI 与跳转；typecheck+build+56 测试通过。
+
 ## 2026-08-22 · Windows 包 v5 交付
 
 - 在 v4 基础上纳入：glass 主题 Adjust 弹窗 portal 修复、Transfers Admin 收件箱兜底无人认领请求。配置不变（--no-demo + 真实 xlsx）。
