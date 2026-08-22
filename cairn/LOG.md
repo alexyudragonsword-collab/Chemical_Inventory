@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Adjust 去掉 Add 选项（业务规则：容器只消耗不补充）
+
+- 用户明确业务规则：新化学品一律走 Check-In 入库，容器只会消耗到空，不会中途补充。
+- 改动：Adjust 对话框只剩 Deduct / Correct count 两个 tab；行内 "+" 按钮移除（只剩 −）；server action 的 mode enum 去掉 ADD（UI 和入口双层封死）。域层 adjustQuantity 保留 ADD 能力（测试覆盖，未来若需要可从入口恢复）。
+- 验证：Playwright 确认 + 按钮为 0、tab 为 ["Deduct","Correct count"]；typecheck+build+56 测试通过。
+
 ## 2026-08-21 · Sign in 页新增自助注册（/sign-up）
 
 - 新增 `/sign-up` 注册页（(auth) 组，风格与 sign-in 一致），Sign in 页底部加 "Create an account" 入口。

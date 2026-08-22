@@ -1,6 +1,8 @@
 "use client";
 
-// One dialog for the three quantity flows: Deduct, Add, Correct count.
+// One dialog for the two quantity flows: Deduct and Correct count.
+// There is deliberately no "Add": stock only enters through Check-In —
+// containers are consumed until empty, never topped up.
 // Shows the resulting number before confirm (deck: "the before → after strip
 // removes the mental arithmetic") and reveals the witness fields only when
 // the server says one is required.
@@ -21,7 +23,7 @@ export type AdjustTarget = {
   isControlled: boolean;
 };
 
-type Mode = "DEDUCT" | "ADD" | "CORRECT";
+type Mode = "DEDUCT" | "CORRECT";
 
 export function AdjustDialog({
   target,
@@ -46,8 +48,6 @@ export function AdjustDialog({
     switch (mode) {
       case "DEDUCT":
         return target.currentQuantity - amount;
-      case "ADD":
-        return target.currentQuantity + amount;
       case "CORRECT":
         return amount;
     }
@@ -144,7 +144,7 @@ export function AdjustDialog({
           <>
             {/* Mode tabs */}
             <div className="mt-4 flex gap-1 rounded-md bg-paper p-1">
-              {(["DEDUCT", "ADD", "CORRECT"] as Mode[]).map((m) => (
+              {(["DEDUCT", "CORRECT"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
@@ -152,7 +152,7 @@ export function AdjustDialog({
                     mode === m ? "bg-card text-teal-deep shadow-sm" : "text-muted hover:text-ink"
                   }`}
                 >
-                  {m === "DEDUCT" ? "Deduct" : m === "ADD" ? "Add" : "Correct count"}
+                  {m === "DEDUCT" ? "Deduct" : "Correct count"}
                 </button>
               ))}
             </div>
@@ -274,16 +274,14 @@ export function AdjustDialog({
                 onClick={submit}
                 disabled={pending || invalid || Number.isNaN(amount)}
                 className={`rounded-md px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${
-                  mode === "DEDUCT" ? "bg-teal hover:bg-teal-deep" : mode === "ADD" ? "bg-teal hover:bg-teal-deep" : "bg-accent hover:opacity-90"
+                  mode === "DEDUCT" ? "bg-teal hover:bg-teal-deep" : "bg-accent hover:opacity-90"
                 }`}
               >
                 {pending
                   ? "Recording…"
                   : mode === "DEDUCT"
                     ? "Confirm deduct"
-                    : mode === "ADD"
-                      ? "Confirm add"
-                      : "Confirm correction"}
+                    : "Confirm correction"}
               </button>
             </div>
           </>

@@ -18,7 +18,7 @@ export function RowAdjust({
   custodianName: string | null;
   disabledReason?: string;
 }) {
-  const [open, setOpen] = useState<"DEDUCT" | "ADD" | null>(null);
+  const [open, setOpen] = useState<"DEDUCT" | null>(null);
 
   if (mode === "restricted") {
     return (
@@ -41,19 +41,13 @@ export function RowAdjust({
   return (
     <>
       <div className="flex items-center gap-1">
+        {/* No "+" here: stock only enters through Check-In. */}
         <button
           onClick={() => setOpen("DEDUCT")}
           className="h-7 w-7 rounded-full border border-line text-sm leading-none text-ink hover:border-teal hover:bg-teal-soft"
-          title="Deduct quantity"
+          title="Deduct or correct quantity"
         >
           −
-        </button>
-        <button
-          onClick={() => setOpen("ADD")}
-          className="h-7 w-7 rounded-full border border-line text-sm leading-none text-ink hover:border-teal hover:bg-teal-soft"
-          title="Add quantity"
-        >
-          +
         </button>
       </div>
       {open && (

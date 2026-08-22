@@ -14,7 +14,9 @@ import { requireUser } from "@/server/session";
 
 const adjustSchema = z.object({
   containerId: z.string().min(1),
-  mode: z.enum(["DEDUCT", "ADD", "CORRECT"]),
+  // No "ADD": stock only enters through Check-In; containers are consumed
+  // until empty, never topped up.
+  mode: z.enum(["DEDUCT", "CORRECT"]),
   amount: z.coerce.number().nonnegative(),
   reason: z.string().trim().optional(),
   projectCode: z.string().trim().optional(),
@@ -26,7 +28,6 @@ const adjustSchema = z.object({
 // dialog no longer asks for one, so record the action itself.
 const DEFAULT_REASONS = {
   DEDUCT: "Quantity deducted",
-  ADD: "Quantity added",
   CORRECT: "Count correction",
 } as const;
 
