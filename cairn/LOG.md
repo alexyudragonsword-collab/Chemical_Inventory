@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · Transfers：Admin 收件箱兜底无人认领请求
+
+- 背景：转移审批人 = 容器保管人 或 所属实验室 manager；导入初期两者都可能缺失，请求会落到"谁都看不见"的死角。
+- 改动：Admin 的 Incoming 增加兜底分支（currentCustodian 为空 且 所属实验室无 manager 的 PENDING 请求），行内加 "Unclaimed — no custodian or lab manager" 黄色标识；普通 manager 视图不变。
+- 验证：本地造 orphan 请求（R02-08 容器）——li.wei 不可见、admin 可见带标识；typecheck+build+56 测试通过；测试数据已清理。
+
 ## 2026-08-22 · Windows 包 v4 交付（含近三批 UI 改动）
 
 - 重打包（--no-demo + 真实 xlsx）：纳入 自助注册页、Adjust 去 Add、Adjust/Check-out 去 Purpose+Project 全部改动。

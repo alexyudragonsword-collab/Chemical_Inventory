@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function TransfersPage() {
   const user = await requireUser();
   const managedLabIds = user.memberships.filter((m) => m.isManager).map((m) => m.labId);
+  const isAdmin = user.role === "ADMIN";
 
   const [incoming, outgoing] = await Promise.all([
     prisma.transferRequest.findMany({
@@ -20,10 +21,30 @@ export default async function TransfersPage() {
         OR: [
           { currentCustodianId: user.id },
           ...(managedLabIds.length ? [{ container: { labId: { in: managedLabIds } } }] : []),
+          // Admin backstop: unclaimed requests that would land in nobody's
+          // inbox — the container has no custodian and its lab has no
+          // manager yet (common right after a legacy import).
+          ...(isAdmin
+            ? [
+                {
+                  currentCustodianId: null,
+                  container: { lab: { memberships: { none: { isManager: true } } } },
+                },
+              ]
+            : []),
         ],
       },
       include: {
-        container: { include: { substance: true, lab: true } },
+        container: {
+          include: {
+            substance: true,
+            lab: {
+              include: {
+                memberships: { where: { isManager: true }, select: { id: true }, take: 1 },
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -58,6 +79,13 @@ export default async function TransfersPage() {
                 <div className="text-sm font-medium">
                   {r.container.substance.name}
                   <span className="ml-2 text-xs text-muted">{r.container.code}</span>
+                  {isAdmin &&
+                    !r.currentCustodianId &&
+                    r.container.lab.memberships.length === 0 && (
+                      <span className="ml-2">
+                        <Pill tone="warning">Unclaimed — no custodian or lab manager</Pill>
+                      </span>
+                    )}
                 </div>
                 <div className="text-xs text-muted">
                   {formatQuantity(r.container.currentQuantity.toNumber(), r.container.unit)} remaining
