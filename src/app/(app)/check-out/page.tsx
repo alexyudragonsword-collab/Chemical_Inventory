@@ -29,16 +29,13 @@ export default async function CheckOutPage({
       })
     : null;
 
-  const [projects, labMembers] = container
-    ? await Promise.all([
-        prisma.project.findMany({ where: { isActive: true }, select: { code: true, name: true } }),
-        prisma.user.findMany({
-          where: { isActive: true, id: { not: user.id } },
-          select: { id: true, name: true },
-          orderBy: { name: "asc" },
-        }),
-      ])
-    : [[], []];
+  const labMembers = container
+    ? await prisma.user.findMany({
+        where: { isActive: true, id: { not: user.id } },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      })
+    : [];
 
   return (
     <div className="max-w-3xl">
@@ -96,7 +93,6 @@ export default async function CheckOutPage({
             custodianId: container.custodianId,
             isControlled: container.substance.isControlled,
           })}
-          projects={projects}
           people={labMembers}
         />
       )}

@@ -17,10 +17,12 @@ export type CheckOutResult =
   | { ok: true; message: string; transactionId?: string }
   | { ok: false; error: string; needWitness?: boolean };
 
+// The audit trail requires a non-empty reason on every transaction; the
+// forms no longer ask for one, so each action records what happened.
 const deductSchema = z.object({
   containerId: z.string().min(1),
   amount: z.coerce.number().positive(),
-  reason: z.string().trim().min(1),
+  reason: z.string().trim().optional(),
   projectCode: z.string().trim().optional(),
   dispensedInto: z.string().trim().optional(),
   fumeHood: z.string().trim().optional(),
@@ -45,7 +47,7 @@ export async function checkOutDeductAction(input: unknown): Promise<CheckOutResu
       containerId: data.containerId,
       mode: "DEDUCT",
       amount: data.amount,
-      reason: data.reason,
+      reason: data.reason || "Quantity deducted",
       projectCode: data.projectCode || undefined,
       witnessId,
       // The pre-dispense checks are captured in the audit record, not
@@ -70,7 +72,7 @@ export async function checkOutDeductAction(input: unknown): Promise<CheckOutResu
 const transferSchema = z.object({
   containerId: z.string().min(1),
   toUserId: z.string().min(1),
-  reason: z.string().trim().min(1),
+  reason: z.string().trim().optional(),
   witnessEmail: z.string().trim().optional(),
   witnessPassword: z.string().optional(),
 });
@@ -90,7 +92,7 @@ export async function checkOutTransferAction(input: unknown): Promise<CheckOutRe
       user,
       containerId: data.containerId,
       toUserId: data.toUserId,
-      reason: data.reason,
+      reason: data.reason || "Custody transfer",
       witnessId,
     });
     revalidatePath("/inventory");
@@ -102,7 +104,7 @@ export async function checkOutTransferAction(input: unknown): Promise<CheckOutRe
 
 const disposeSchema = z.object({
   containerId: z.string().min(1),
-  reason: z.string().trim().min(1),
+  reason: z.string().trim().optional(),
   wasteStream: z.string().trim().optional(),
   witnessEmail: z.string().trim().optional(),
   witnessPassword: z.string().optional(),
@@ -122,7 +124,7 @@ export async function checkOutDisposeAction(input: unknown): Promise<CheckOutRes
     await disposeContainer({
       user,
       containerId: data.containerId,
-      reason: data.reason,
+      reason: data.reason || "Container disposed",
       wasteStream: data.wasteStream || undefined,
       witnessId,
     });

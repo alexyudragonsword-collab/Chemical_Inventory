@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-21 · Check-out 三操作去掉 Purpose/Reason 与 Project 字段
+
+- Deduct/Transfer/Dispose 三个表单不再要求 Purpose/Reason，Project/cost centre 下拉一并移除；保留 Dispensed into/Fume hood/检查清单（deduct）、收件人（transfer）、Waste stream（dispose，选填）。
+- 审计默认 reason：Quantity deducted / Custody transfer / Container disposed（action 层写入，schema reason 转 optional）；check-out 页不再查询 projects。
+- 验证：Playwright 三 tab 目检 + 无 Purpose 完成 deduct→reverse 闭环；typecheck+build+56 测试通过。附带发现本地库 B2-14-C03 为 Missing，状态门禁正确拦截（非缺陷）。
+
 ## 2026-08-21 · Adjust 去掉 Add 选项（业务规则：容器只消耗不补充）
 
 - 用户明确业务规则：新化学品一律走 Check-In 入库，容器只会消耗到空，不会中途补充。

@@ -45,14 +45,12 @@ export function CheckOutPanel({
   mode,
   transferMode,
   disposeMode,
-  projects,
   people,
 }: {
   container: ContainerView;
   mode: Mode;
   transferMode: Mode;
   disposeMode: Mode;
-  projects: { code: string; name: string }[];
   people: { id: string; name: string }[];
 }) {
   const router = useRouter();
@@ -66,18 +64,14 @@ export function CheckOutPanel({
 
   // Deduct state
   const [amount, setAmount] = useState(presetSteps(container.unit)[2] ?? 1);
-  const [reason, setReason] = useState("");
-  const [projectCode, setProjectCode] = useState("");
   const [dispensedInto, setDispensedInto] = useState("");
   const [fumeHood, setFumeHood] = useState("");
   const [checks, setChecks] = useState<string[]>([]);
 
   // Transfer state
   const [toUserId, setToUserId] = useState("");
-  const [transferReason, setTransferReason] = useState("");
 
   // Dispose state
-  const [disposeReason, setDisposeReason] = useState("");
   const [wasteStream, setWasteStream] = useState("");
 
   const daysToExpiry = container.expiryDate
@@ -243,19 +237,6 @@ export function CheckOutPanel({
                     {formatQty(container.currentQuantity, container.unit)} →{" "}
                     <strong>{formatQty(Math.max(0, container.currentQuantity - (amount || 0)), container.unit)}</strong>
                   </p>
-                  <label className="mt-3 block text-xs font-semibold tracking-wide text-muted uppercase">
-                    Purpose (required)
-                    <input value={reason} onChange={(e) => setReason(e.target.value)} className="input mt-1" placeholder="Reaction solvent" />
-                  </label>
-                  <label className="mt-2 block text-xs font-semibold tracking-wide text-muted uppercase">
-                    Project / cost centre
-                    <select value={projectCode} onChange={(e) => setProjectCode(e.target.value)} className="input mt-1">
-                      <option value="">—</option>
-                      {projects.map((p) => (
-                        <option key={p.code} value={p.code}>{p.code} · {p.name}</option>
-                      ))}
-                    </select>
-                  </label>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold tracking-wide text-muted uppercase">
@@ -298,10 +279,6 @@ export function CheckOutPanel({
                     ))}
                   </select>
                 </label>
-                <label className="mt-2 block text-xs font-semibold tracking-wide text-muted uppercase">
-                  Reason (required)
-                  <input value={transferReason} onChange={(e) => setTransferReason(e.target.value)} className="input mt-1" placeholder="Borrowed for Project 44-B" />
-                </label>
                 <p className="mt-2 text-xs text-muted">
                   The container moves to the receiver&apos;s custody (and their lab, if different).
                   Its shelf assignment clears when it changes lab.
@@ -312,10 +289,6 @@ export function CheckOutPanel({
             {tab === "dispose" && disposeMode === "editable" && (
               <div className="max-w-md">
                 <label className="block text-xs font-semibold tracking-wide text-muted uppercase">
-                  Reason (required)
-                  <input value={disposeReason} onChange={(e) => setDisposeReason(e.target.value)} className="input mt-1" placeholder="Expired; peroxide risk" />
-                </label>
-                <label className="mt-2 block text-xs font-semibold tracking-wide text-muted uppercase">
                   Waste stream
                   <input value={wasteStream} onChange={(e) => setWasteStream(e.target.value)} className="input mt-1" placeholder="Halogen-free solvent W-02" />
                 </label>
@@ -345,8 +318,8 @@ export function CheckOutPanel({
               </span>
               {tab === "deduct" && mode === "editable" && (
                 <button
-                  onClick={() => run(() => checkOutDeductAction({ containerId: container.id, amount, reason, projectCode: projectCode || undefined, dispensedInto: dispensedInto || undefined, fumeHood: fumeHood || undefined, checklist: checks, ...witness }))}
-                  disabled={pending || !reason.trim() || !(amount > 0)}
+                  onClick={() => run(() => checkOutDeductAction({ containerId: container.id, amount, dispensedInto: dispensedInto || undefined, fumeHood: fumeHood || undefined, checklist: checks, ...witness }))}
+                  disabled={pending || !(amount > 0)}
                   className="rounded-md bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep disabled:opacity-50"
                 >
                   {pending ? "Recording…" : `Confirm deduct ${amount || ""} ${unitLabel(container.unit)}`}
@@ -354,8 +327,8 @@ export function CheckOutPanel({
               )}
               {tab === "transfer" && transferMode === "editable" && (
                 <button
-                  onClick={() => run(() => checkOutTransferAction({ containerId: container.id, toUserId, reason: transferReason, ...witness }))}
-                  disabled={pending || !toUserId || !transferReason.trim()}
+                  onClick={() => run(() => checkOutTransferAction({ containerId: container.id, toUserId, ...witness }))}
+                  disabled={pending || !toUserId}
                   className="rounded-md bg-teal px-4 py-2 text-sm font-semibold text-white hover:bg-teal-deep disabled:opacity-50"
                 >
                   {pending ? "Recording…" : "Confirm transfer"}
@@ -363,8 +336,8 @@ export function CheckOutPanel({
               )}
               {tab === "dispose" && disposeMode === "editable" && (
                 <button
-                  onClick={() => run(() => checkOutDisposeAction({ containerId: container.id, reason: disposeReason, wasteStream: wasteStream || undefined, ...witness }))}
-                  disabled={pending || !disposeReason.trim()}
+                  onClick={() => run(() => checkOutDisposeAction({ containerId: container.id, wasteStream: wasteStream || undefined, ...witness }))}
+                  disabled={pending}
                   className="rounded-md bg-danger px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {pending ? "Recording…" : "Confirm dispose"}
