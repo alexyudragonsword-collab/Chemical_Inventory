@@ -42,18 +42,20 @@ CACHE="$WIN/cache"
 STAGE="$WIN/stage"
 XLSX="${XLSX:-}"
 NO_DEMO=0
+NAME_SUFFIX=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --) shift ;; # pnpm passes the separator through
     --xlsx) XLSX="$2"; shift 2 ;;
     --no-demo) NO_DEMO=1; shift ;; # snapshot without demo labs/inventory
+    --suffix) NAME_SUFFIX="$2"; shift 2 ;; # e.g. -demo: appended to dir and zip name
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
   esac
 done
 
 PKG_VERSION="$(node -p "require('$REPO/package.json').version")"
-OUT_DIR_NAME="ChemTrack-${PKG_VERSION}-win64"
+OUT_DIR_NAME="ChemTrack-${PKG_VERSION}-win64${NAME_SUFFIX}"
 ZIP_PATH="$REPO/${OUT_DIR_NAME}.zip"
 
 log() { printf '\n== %s\n' "$*"; }
