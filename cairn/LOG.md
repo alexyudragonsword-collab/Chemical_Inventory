@@ -2,6 +2,11 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · Windows 包 v5 交付
+
+- 在 v4 基础上纳入：glass 主题 Adjust 弹窗 portal 修复、Transfers Admin 收件箱兜底无人认领请求。配置不变（--no-demo + 真实 xlsx）。
+- 验证门全绿（479 容器/6 账号/审计链 479 事件/双冒烟）。85MB zip（sha256 前缀 fedddae5）拆 3 卷交付，合并脚本/说明校验值同步更新。
+
 ## 2026-08-22 · Glass 主题 Adjust 弹窗错位修复（backdrop-filter 陷阱）
 
 - 用户反馈：Liquid Glass 主题下点 Adjust 弹窗不在视口中心，要往下滚动才能看到（其余三主题正常）。
