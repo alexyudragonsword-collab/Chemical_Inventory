@@ -2,6 +2,12 @@
 
 本文件按倒序记录实质性进展——最新条目在本行下方顶部。每条保持简短——只写摘要与指针；结论沉淀到 `cairn/<topic>.md`。
 
+## 2026-08-22 · 演示版重打包交付（-demo 命名）
+
+- 应用户要求以最新代码重打演示配置包（种子演示数据 + 真实 xlsx，与 v1/v2 同数据形态），产物改名 `ChemTrack-0.1.0-win64-demo.zip` 与 v5 正式版区分；配套独立 `join-package-demo.bat`（按 *demo* 通配匹配分卷，防与正式版混拼）。
+- 验证门全绿：507 容器/9 账号/审计链 510 事件/双冒烟。sha256 前缀 2d3fa638，拆 3 卷交付。
+- 注意：两版 zip 解压后内部目录同名（ChemTrack-0.1.0-win64），同机安装需解压到不同目录。
+
 ## 2026-08-22 · Dashboard KPI：Below min level → Disposed items
 
 - 用户判断 below-min 指标无意义（容器只消耗到空不补充，min-stock 补货逻辑不适用）。KPI 第三块改为 Disposed items：保管范围内已处置容器总数 + 近 30 天处置数（DISPOSE 交易计数），点击直达 Inventory → Disposed 登记册。
