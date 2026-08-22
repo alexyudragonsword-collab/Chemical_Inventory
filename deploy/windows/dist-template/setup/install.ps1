@@ -122,21 +122,29 @@ if (-not $freshInstall) {
 # --- 8. Shortcuts ----------------------------------------------------------
 $envTable = Read-EnvFile $envFile
 $appPortFinal = $envTable["PORT"]
+
+# Flavor suffix (e.g. -demo) taken from the install folder name, so shortcuts
+# from different flavors installed side by side don't overwrite each other.
+$rootLeaf = Split-Path $Root -Leaf
+$flavor = ""
+if ($rootLeaf -match "(?i)win64[-_](.+)$") { $flavor = "-$($Matches[1])" }
+elseif ($rootLeaf -match "(?i)demo") { $flavor = "-demo" }
+
 try {
     $shell = New-Object -ComObject WScript.Shell
     $desktop = [Environment]::GetFolderPath("Desktop")
 
-    $lnk = $shell.CreateShortcut((Join-Path $desktop "ChemTrack - Start.lnk"))
+    $lnk = $shell.CreateShortcut((Join-Path $desktop "ChemTrack$flavor - Start.lnk"))
     $lnk.TargetPath = Join-Path $Root "start.bat"
     $lnk.WorkingDirectory = $Root
     $lnk.Save()
 
-    $lnk = $shell.CreateShortcut((Join-Path $desktop "ChemTrack - Stop.lnk"))
+    $lnk = $shell.CreateShortcut((Join-Path $desktop "ChemTrack$flavor - Stop.lnk"))
     $lnk.TargetPath = Join-Path $Root "stop.bat"
     $lnk.WorkingDirectory = $Root
     $lnk.Save()
 
-    $url = $shell.CreateShortcut((Join-Path $desktop "ChemTrack.url"))
+    $url = $shell.CreateShortcut((Join-Path $desktop "ChemTrack$flavor.url"))
     $url.TargetPath = "http://localhost:$appPortFinal"
     $url.Save()
     Write-Host "Desktop shortcuts created."

@@ -7,6 +7,7 @@
 - 应用户要求以最新代码重打演示配置包（种子演示数据 + 真实 xlsx，与 v1/v2 同数据形态），产物改名 `ChemTrack-0.1.0-win64-demo.zip` 与 v5 正式版区分；配套独立 `join-package-demo.bat`（按 *demo* 通配匹配分卷，防与正式版混拼）。
 - 验证门全绿：507 容器/9 账号/审计链 510 事件/双冒烟。sha256 前缀 2d3fa638，拆 3 卷交付。
 - 后续（同日）：用户要求内部目录名也区分——`build-package.sh` 加 `--suffix` 选项（目录与 zip 同后缀）；本次交付用已验证 zip 原地重组（解包→改目录名→重打包，脚本全用相对路径无硬编码目录名），内部目录改为 `ChemTrack-0.1.0-win64-demo`，重新拆卷交付（sha256 前缀 7abc01f0，旧 demo 分卷作废）。
+- 再后续（同日）：桌面三个快捷方式（Start/Stop/.url）也要区分——install.ps1 从安装目录名自动识别 flavor 后缀（win64-xxx 或含 demo）拼入快捷方式名（如 `ChemTrack-demo - Start.lnk`），正式版目录无后缀则名字不变；重组注入交付（sha256 前缀 116f22bb，前批 demo 分卷作废）。
 
 ## 2026-08-22 · Dashboard KPI：Below min level → Disposed items
 
